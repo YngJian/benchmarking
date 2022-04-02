@@ -47,5 +47,11 @@
         <foreach item="item" collection="seriesNames" open="(" separator="," close=")" index="index">
             #{item}
         </foreach>
+        <if test="startTime != null and startTime != ''">
+            <![CDATA[ and ids.Date_month >= #{startTime,jdbcType=TIMESTAMP} ]]>
+        </if>
+        <if test="endTime != null and endTime != ''">
+            <![CDATA[ and ids.Date_month <= #{endTime,jdbcType=TIMESTAMP} ]]>
+        </if>
     </select>
 </mapper>

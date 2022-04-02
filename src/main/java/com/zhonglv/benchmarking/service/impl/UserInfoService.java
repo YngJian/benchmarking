@@ -1,8 +1,9 @@
 package com.zhonglv.benchmarking.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.zhonglv.benchmarking.common.CommonResponse;
+import com.zhonglv.benchmarking.common.Result;
 import com.zhonglv.benchmarking.domain.entity.UserInfo;
+import com.zhonglv.benchmarking.domain.entity.dto.UserDto;
 
 /**
  * @author yangj
@@ -16,5 +17,5 @@ public interface UserInfoService extends IService<UserInfo> {
      * @param password password
      * @return CommonResponse
      */
-    CommonResponse login(String userName, String password);
+    Result<UserDto> login(String userName, String password);
 }

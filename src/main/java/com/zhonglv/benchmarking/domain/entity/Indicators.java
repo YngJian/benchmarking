@@ -11,7 +11,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@ApiModel(value = "com-zhonglv-benchmarking-domain-entity-Indicators")
+/**
+ * @author Administrator
+ */
+@ApiModel(value = "indicators")
 @Data
 @Builder
 @AllArgsConstructor
@@ -22,14 +25,14 @@ public class Indicators {
      * 自增列
      */
     @TableId(value = "I_id", type = IdType.AUTO)
-    @ApiModelProperty(value = "自增列")
+    @ApiModelProperty(value = "自增列", name = "iid")
     private Integer iId;
 
     /**
      * 三级指标序号
      */
     @TableField(value = "I_number")
-    @ApiModelProperty(value = "三级指标序号")
+    @ApiModelProperty(value = "三级指标序号", name = "inumber")
     private String iNumber;
 
     /**

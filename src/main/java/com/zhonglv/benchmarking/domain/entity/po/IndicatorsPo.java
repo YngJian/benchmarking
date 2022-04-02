@@ -12,6 +12,9 @@ import lombok.experimental.Accessors;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author Administrator
+ */
 @ApiModel(value = "系列数据")
 @Data
 @AllArgsConstructor

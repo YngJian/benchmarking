@@ -7,7 +7,6 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author yangj
@@ -27,7 +26,11 @@ public interface SeriesInfoMapper extends BaseMapper<SeriesInfo> {
      * selectIndicators
      *
      * @param seriesNames seriesNames
+     * @param startTime startTime
+     * @param endTime endTime
      * @return List<Indicators>
      */
-    List<Indicators> selectIndicators(@Param("seriesNames") List<String> seriesNames);
+    List<Indicators> selectIndicators(@Param("seriesNames") List<String> seriesNames,
+                                      @Param("startTime") String startTime,
+                                      @Param("endTime")  String endTime);
 }

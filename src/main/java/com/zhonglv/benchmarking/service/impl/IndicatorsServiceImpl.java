@@ -4,8 +4,9 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.zhonglv.benchmarking.common.CacheMap;
-import com.zhonglv.benchmarking.common.CommonResponse;
+import com.zhonglv.benchmarking.common.CommonResult;
 import com.zhonglv.benchmarking.common.ConstantType;
+import com.zhonglv.benchmarking.common.Result;
 import com.zhonglv.benchmarking.domain.entity.SeriesInfo;
 import com.zhonglv.benchmarking.domain.entity.dto.IndicatorsDto;
 import com.zhonglv.benchmarking.domain.entity.dto.UserInfoDto;
@@ -28,6 +29,9 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * @author Administrator
+ */
 @Service
 @Slf4j
 public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicators> implements IndicatorsService {
@@ -45,34 +49,37 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
      *
      * @param token       token
      * @param seriesNames seriesNames
+     * @param startTime startTime
+     * @param endTime endTime
      * @return CommonResponse
      */
     @Override
-    public CommonResponse getIndicators(String token, List<String> seriesNames) {
+    public Result<IndicatorsPo> getIndicators(String token, String seriesNames, String startTime, String endTime) {
         String redis = stringRedisTemplate.opsForValue().get(ConstantType.TOKEN_KEY + token);
         if (StringUtils.isBlank(redis)) {
             log.info("The token has expired.");
-            return new CommonResponse().invalidParameter("The token has expired.");
+            return new Result<>(CommonResult.INVALID_PARAM.getCode(),"The token has expired.",null);
         }
         UserInfoDto userInfoDto = JSONObject.parseObject(redis, UserInfoDto.class);
         List<SeriesInfo> seriesInfoList = userInfoDto.getSeriesInfoList();
         if (CollectionUtil.isEmpty(seriesInfoList)) {
             log.info("This user does not have any data rights!");
-            return new CommonResponse().invalidParameter("This user does not have any data rights!");
+            return new Result<>(CommonResult.INVALID_PARAM.getCode(),"This user does not have any data rights!",null);
         }
 
         Set<String> series = seriesInfoList.stream().map(SeriesInfo::getInfo).collect(Collectors.toSet());
         List<String> seriesNamesList = new ArrayList<>(series);
 
-        if (CollectionUtil.isNotEmpty(seriesNames)) {
-            boolean anyMatch = seriesNames.stream().anyMatch(s -> !series.contains(s));
+        if (StringUtils.isNotEmpty(seriesNames)) {
+            String[] split = seriesNames.split(",");
+            boolean anyMatch = Arrays.stream(split).anyMatch(s -> !series.contains(s));
             if (anyMatch) {
                 log.info("Please pass in the correct parameter, which contains the unexisted viewing permission!");
-                return new CommonResponse().invalidParameter("Please pass in the correct parameter, which contains the unexisted viewing permission!");
+                return new Result<>(CommonResult.INVALID_PARAM.getCode(),"Please pass in the correct parameter, which contains the unexisted viewing permission!",null);
             }
-            seriesNamesList = seriesNames;
+            seriesNamesList = Arrays.asList(split);
         }
-        List<Indicators> indicatorsList = seriesInfoMapper.selectIndicators(seriesNamesList);
+        List<Indicators> indicatorsList = seriesInfoMapper.selectIndicators(seriesNamesList, startTime, endTime);
 
         Map<String, List<Indicators>> groupIndicators = getGroupIndicators(Indicators::getSeriesName, indicatorsList);
 
@@ -80,14 +87,14 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
         List<String> standard = groupList.stream().map(CacheMap.MONTH_MAP::get).collect(Collectors.toList());
         Map<String, List<Indicators>> standardMap = new HashMap<>();
         if (CollectionUtil.isNotEmpty(standard)) {
-            List<Indicators> standardIndicators = seriesInfoMapper.selectIndicators(standard);
+            List<Indicators> standardIndicators = seriesInfoMapper.selectIndicators(standard, startTime, endTime);
             standardMap = getGroupIndicators(Indicators::getGroupName, standardIndicators);
         }
         IndicatorsPo indicatorsPo = new IndicatorsPo()
                 .setIndicatorsMap(groupIndicators)
                 .setStandardMap(standardMap);
 
-        return new CommonResponse().success().data(indicatorsPo);
+        return new Result<IndicatorsPo>().toSuccess(indicatorsPo);
     }
 
     private Map<String, List<Indicators>> getGroupIndicators(Function<Indicators, String> classifier, List<Indicators> standardIndicators) {

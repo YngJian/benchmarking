@@ -3,11 +3,12 @@ package com.zhonglv.benchmarking.service;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zhonglv.benchmarking.common.CommonResponse;
 import com.zhonglv.benchmarking.common.CommonResult;
 import com.zhonglv.benchmarking.common.ConstantType;
+import com.zhonglv.benchmarking.common.Result;
 import com.zhonglv.benchmarking.domain.entity.SeriesInfo;
 import com.zhonglv.benchmarking.domain.entity.UserInfo;
+import com.zhonglv.benchmarking.domain.entity.dto.UserDto;
 import com.zhonglv.benchmarking.domain.entity.dto.UserInfoDto;
 import com.zhonglv.benchmarking.domain.mapper.SeriesInfoMapper;
 import com.zhonglv.benchmarking.domain.mapper.UserInfoMapper;
@@ -46,18 +47,18 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
      * @return CommonResponse
      */
     @Override
-    public CommonResponse login(String userName, String password) {
+    public Result<UserDto> login(String userName, String password) {
         LambdaQueryWrapper<UserInfo> userInfoWrapper = new LambdaQueryWrapper<>();
         userInfoWrapper.eq(UserInfo::getUserName, userName).last("limit 1");
         UserInfo userInfo = userInfoMapper.selectOne(userInfoWrapper);
         if (userInfo == null) {
             log.info("Username [{}] does not exist.", userName);
-            return new CommonResponse().put(CommonResult.INVALID_PARAM.getCode(), "Username does not exist.");
+            return new Result<UserDto>().toInvalidParam("Username does not exist.");
         }
         // 密码是否正确
         if (!password.equals(userInfo.getPwd())) {
             log.info("[{}] wrong password.", userName);
-            return new CommonResponse().put(CommonResult.INVALID_PARAM.getCode(), "Wrong password.");
+            return new Result<UserDto>().toInvalidParam("Wrong password.");
         }
         // 查询用户信息和数据权限
         List<SeriesInfo> seriesInfoList = seriesInfoMapper.selectSeriesByGroupId(userInfo.getGroupId());
@@ -72,7 +73,9 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         // 设置redis
         stringRedisTemplate.opsForValue().set(ConstantType.TOKEN_KEY + token,
                 JSONUtil.toJsonStr(userInfoDto), ConstantType.TOKEN_EXPIRE_MINUTES, TimeUnit.MINUTES);
-
-        return Objects.requireNonNull(new CommonResponse().put("token", token)).data(userInfoDto);
+        UserDto userDto = new UserDto()
+                .setUserInfoDto(userInfoDto)
+                .setToken(token);
+        return new Result<UserDto>().toSuccess(userDto);
     }
 }

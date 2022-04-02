@@ -1,6 +1,7 @@
 package com.zhonglv.benchmarking.handler;
 
-import com.zhonglv.benchmarking.common.CommonResponse;
+import com.zhonglv.benchmarking.common.CommonResult;
+import com.zhonglv.benchmarking.common.Result;
 import com.zhonglv.benchmarking.exception.UnLoginException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -25,7 +26,7 @@ import java.util.List;
 public class GlobalExceptionHandler {
     @ExceptionHandler(value = Exception.class)
     @ResponseBody
-    public CommonResponse myExceptionHandle(Exception exception) {
+    public Result<Object> myExceptionHandle(Exception exception) {
         log.error(exception.getMessage(), exception);
         BindingResult result = null;
         if (exception instanceof MethodArgumentNotValidException) {
@@ -33,11 +34,11 @@ public class GlobalExceptionHandler {
         } else if (exception instanceof BindException) {
             result = ((BindException) exception).getBindingResult();
         } else if (exception instanceof UnLoginException) {
-            return new CommonResponse().success(HttpStatus.FORBIDDEN, exception.getMessage());
+            return new Result<Object>(HttpStatus.FORBIDDEN.value(), exception.getMessage(),null);
         }
 
         if (result == null) {
-            return new CommonResponse().fail("failed");
+            return new Result<>().toFailed();
         }
 
         StringBuilder errorMsg = new StringBuilder();
@@ -46,7 +47,7 @@ public class GlobalExceptionHandler {
             fieldErrors.forEach(error ->
                     errorMsg.append(error.getField()).append(": ").append(error.getDefaultMessage()).append("!"));
         }
-        return new CommonResponse().fail(errorMsg.toString());
+        return new Result<>().toFailed(errorMsg.toString());
     }
 
 }

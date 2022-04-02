@@ -29,17 +29,9 @@
         where tsp.group_id = #{groupId,jdbcType=BIGINT}
     </select>
 
-    <sql id="Base_Indicators_Column_List">
-        <!--@mbg.generated-->
-        ids.I_id, ids.I_number, ids.Working_procedure_classification, ids.Category_of_indicators, ids.Indicators_name,
-        ids.Unit, ids.Indicators_grade, ids.Benchmarking_enterprise, ids.Benchmark_value, ids.Average_reference_value,
-        ids.Completion_value, ids.Weight, ids.Single_index_capability_index, ids.Process_comprehensive_capability_index,
-        ids.Series_comprehensive_capability_index, ids.Group_name, ids.Branch_company, ids.Electrolytic_series,
-        ids.Series_name, ids.`Year`, ids.`Month`, ids.Date_month, ids.Date_enter
-    </sql>
     <select id="selectIndicators" resultType="com.zhonglv.benchmarking.domain.entity.Indicators">
         select
-        <include refid="Base_Indicators_Column_List"/>
+        <include refid="com.zhonglv.benchmarking.domain.mapper.IndicatorsMapper.Indicators_Column_List"/>
         from t_series_info tsi
         inner join indicators ids
         on tsi.info = ids.series_name

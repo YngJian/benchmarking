@@ -28,12 +28,13 @@
     <result column="Date_month" jdbcType="VARCHAR" property="dateMonth" />
     <result column="Date_enter" jdbcType="VARCHAR" property="dateEnter" />
   </resultMap>
-  <sql id="Base_Column_List">
+
+  <sql id="Indicators_Column_List">
     <!--@mbg.generated-->
-    I_id, I_number, Working_procedure_classification, Category_of_indicators, Indicators_name, 
-    Unit, Indicators_grade, Benchmarking_enterprise, Benchmark_value, Average_reference_value, 
-    Completion_value, Weight, Single_index_capability_index, Process_comprehensive_capability_index, 
-    Series_comprehensive_capability_index, Group_name, Branch_company, Electrolytic_series, 
-    Series_name, `Year`, `Month`, Date_month, Date_enter
+    ids.I_id, ids.I_number, ids.Working_procedure_classification, ids.Category_of_indicators, ids.Indicators_name,
+    ids.Unit, ids.Indicators_grade, ids.Benchmarking_enterprise, ids.Benchmark_value, ids.Average_reference_value,
+    ids.Completion_value, ids.Weight, ids.Single_index_capability_index, ids.Process_comprehensive_capability_index,
+    ids.Series_comprehensive_capability_index, ids.Group_name, ids.Branch_company, ids.Electrolytic_series,
+    ids.Series_name, ids.`Year`, ids.`Month`, ids.Date_month, ids.Date_enter
   </sql>
 </mapper>

@@ -3,12 +3,12 @@ package com.zhonglv.benchmarking.utils;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 import java.util.Date;
 import java.util.Optional;
 
@@ -20,56 +20,37 @@ import java.util.Optional;
 public class DateUtils {
     private DateUtils() {
     }
-
-    public static Long parseTimeToLong(Date date) {
-        return date == null ? null : date.getTime();
-    }
-
     /**
-     * 比较时间
+     * 开始时间结束时间是否合法
      *
-     * @param startTime startTime
-     * @param endTime   endTime
-     * @return true 开始时间大于结束时间，false 开始时间小于结束时间
+     * @param patten    patten
+     * @param startDate startDate
+     * @param endDate   endDate
+     * @return true合法 false不合法
      */
-    public static boolean compareTime(Date startTime, Date endTime) {
-        if (StringUtils.isEmpty(startTime) || StringUtils.isEmpty(endTime)) {
+    public static boolean correctDateParam(String patten, String startDate, String endDate) {
+        DateTimeFormatter dateTimeFormatter = new DateTimeFormatterBuilder()
+                .appendPattern(patten).parseDefaulting(ChronoField.MONTH_OF_YEAR, 1)
+                .parseDefaulting(ChronoField.DAY_OF_MONTH, 1)
+                .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+                .toFormatter();
+        LocalDate start = null;
+        LocalDate end = null;
+        try {
+            if (StringUtils.isNotBlank(startDate)) {
+                start = LocalDate.parse(startDate, dateTimeFormatter);
+            }
+            if (StringUtils.isNotBlank(endDate)) {
+                end = LocalDate.parse(endDate, dateTimeFormatter);
+            }
+            if (start != null && end != null) {
+                return start.isBefore(end) || start.equals(end);
+            }
+            return true;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
             return false;
         }
-        if (!StringUtils.isEmpty(startTime) && !StringUtils.isEmpty(endTime)) {
-            return startTime.after(endTime);
-        }
-        return false;
-    }
-
-    /**
-     * 时间格式是否正确
-     *
-     * @param date date
-     * @return true 正确，false 不正确
-     */
-    public static Optional<Date> parse(String date) {
-        if (!StringUtils.isEmpty(date)) {
-            try {
-                return Optional.of(DateUtil.parse(date, DatePattern.NORM_DATETIME_PATTERN));
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-                return Optional.empty();
-            }
-        }
-        return Optional.empty();
-    }
-
-    /**
-     * local Date time To Date
-     *
-     * @param localDateTime localDateTime
-     * @return date
-     */
-    public static Date localDateTimeToDate(LocalDateTime localDateTime) {
-        ZoneId zoneId = ZoneId.systemDefault();
-        ZonedDateTime zdt = localDateTime.atZone(zoneId);
-        return Date.from(zdt.toInstant());
     }
 
     /**
@@ -83,5 +64,17 @@ public class DateUtils {
         //系统默认的时区
         ZoneId zoneId = ZoneId.systemDefault();
         return LocalDateTime.ofInstant(instant, zoneId);
+    }
+
+    /**
+     * local Date time To Date
+     *
+     * @param localDateTime localDateTime
+     * @return date
+     */
+    public static Date localDateTimeToDate(LocalDateTime localDateTime) {
+        ZoneId zoneId = ZoneId.systemDefault();
+        ZonedDateTime zdt = localDateTime.atZone(zoneId);
+        return Date.from(zdt.toInstant());
     }
 }

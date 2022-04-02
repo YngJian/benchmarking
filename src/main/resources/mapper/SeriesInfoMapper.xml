@@ -1,29 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zhonglv.benchmarking.domain.mapper.SeriesInfoMapper">
-  <resultMap id="BaseResultMap" type="com.zhonglv.benchmarking.domain.entity.SeriesInfo">
-    <!--@mbg.generated-->
-    <!--@Table t_series_info-->
-    <id column="id" jdbcType="BIGINT" property="id" />
-    <result column="info" jdbcType="VARCHAR" property="info" />
-    <result column="electrolytic_series" jdbcType="VARCHAR" property="electrolyticSeries" />
-    <result column="branch_company" jdbcType="VARCHAR" property="branchCompany" />
-    <result column="series_type" jdbcType="SMALLINT" property="seriesType" />
-    <result column="series_desc" jdbcType="VARCHAR" property="seriesDesc" />
-    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
-    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
-  </resultMap>
-  <sql id="Base_Column_List">
-    <!--@mbg.generated-->
-    tsi.id, tsi.info, tsi.electrolytic_series, tsi.branch_company, tsi.series_type, tsi.series_desc, tsi.create_time, tsi.update_time
-  </sql>
+    <resultMap id="BaseResultMap" type="com.zhonglv.benchmarking.domain.entity.SeriesInfo">
+        <!--@mbg.generated-->
+        <!--@Table t_series_info-->
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="info" jdbcType="VARCHAR" property="info"/>
+        <result column="electrolytic_series" jdbcType="VARCHAR" property="electrolyticSeries"/>
+        <result column="branch_company" jdbcType="VARCHAR" property="branchCompany"/>
+        <result column="series_type" jdbcType="SMALLINT" property="seriesType"/>
+        <result column="series_desc" jdbcType="VARCHAR" property="seriesDesc"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        tsi.id, tsi.info, tsi.electrolytic_series, tsi.branch_company, tsi.series_type, tsi.series_desc,
+        tsi.create_time, tsi.update_time
+    </sql>
 
 
-  <select id="selectSeriesByGroupId" resultType="com.zhonglv.benchmarking.domain.entity.SeriesInfo">
-    select <include refid="Base_Column_List"/>
-    from t_series_permission tsp
-    inner join t_series_info tsi
-    on tsp.series_id = tsi.id
-    where tsp.group_id = #{groupId,jdbcType=BIGINT}
-  </select>
+    <select id="selectSeriesByGroupId" resultType="com.zhonglv.benchmarking.domain.entity.SeriesInfo">
+        select
+        <include refid="Base_Column_List"/>
+        from t_series_permission tsp
+        inner join t_series_info tsi
+        on tsp.series_id = tsi.id
+        where tsp.group_id = #{groupId,jdbcType=BIGINT}
+    </select>
+
+    <sql id="Base_Indicators_Column_List">
+        <!--@mbg.generated-->
+        ids.I_id, ids.I_number, ids.Working_procedure_classification, ids.Category_of_indicators, ids.Indicators_name,
+        ids.Unit, ids.Indicators_grade, ids.Benchmarking_enterprise, ids.Benchmark_value, ids.Average_reference_value,
+        ids.Completion_value, ids.Weight, ids.Single_index_capability_index, ids.Process_comprehensive_capability_index,
+        ids.Series_comprehensive_capability_index, ids.Group_name, ids.Branch_company, ids.Electrolytic_series,
+        ids.Series_name, ids.`Year`, ids.`Month`, ids.Date_month, ids.Date_enter
+    </sql>
+    <select id="selectIndicators" resultType="com.zhonglv.benchmarking.domain.entity.Indicators">
+        select
+        <include refid="Base_Indicators_Column_List"/>
+        from t_series_info tsi
+        inner join indicators ids
+        on tsi.info = ids.series_name
+        where tsi.info in
+        <foreach item="item" collection="seriesNames" open="(" separator="," close=")" index="index">
+            #{item}
+        </foreach>
+    </select>
 </mapper>

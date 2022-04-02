@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhonglv.benchmarking.domain.mapper.IndicatorsMapper">
+  <resultMap id="BaseResultMap" type="com.zhonglv.benchmarking.domain.entity.Indicators">
+    <!--@mbg.generated-->
+    <!--@Table indicators-->
+    <id column="I_id" jdbcType="SMALLINT" property="iId" />
+    <result column="I_number" jdbcType="VARCHAR" property="iNumber" />
+    <result column="Working_procedure_classification" jdbcType="VARCHAR" property="workingProcedureClassification" />
+    <result column="Category_of_indicators" jdbcType="VARCHAR" property="categoryOfIndicators" />
+    <result column="Indicators_name" jdbcType="VARCHAR" property="indicatorsName" />
+    <result column="Unit" jdbcType="VARCHAR" property="unit" />
+    <result column="Indicators_grade" jdbcType="VARCHAR" property="indicatorsGrade" />
+    <result column="Benchmarking_enterprise" jdbcType="VARCHAR" property="benchmarkingEnterprise" />
+    <result column="Benchmark_value" jdbcType="VARCHAR" property="benchmarkValue" />
+    <result column="Average_reference_value" jdbcType="VARCHAR" property="averageReferenceValue" />
+    <result column="Completion_value" jdbcType="VARCHAR" property="completionValue" />
+    <result column="Weight" jdbcType="VARCHAR" property="weight" />
+    <result column="Single_index_capability_index" jdbcType="VARCHAR" property="singleIndexCapabilityIndex" />
+    <result column="Process_comprehensive_capability_index" jdbcType="VARCHAR" property="processComprehensiveCapabilityIndex" />
+    <result column="Series_comprehensive_capability_index" jdbcType="VARCHAR" property="seriesComprehensiveCapabilityIndex" />
+    <result column="Group_name" jdbcType="VARCHAR" property="groupName" />
+    <result column="Branch_company" jdbcType="VARCHAR" property="branchCompany" />
+    <result column="Electrolytic_series" jdbcType="VARCHAR" property="electrolyticSeries" />
+    <result column="Series_name" jdbcType="VARCHAR" property="seriesName" />
+    <result column="Year" jdbcType="VARCHAR" property="year" />
+    <result column="Month" jdbcType="VARCHAR" property="month" />
+    <result column="Date_month" jdbcType="VARCHAR" property="dateMonth" />
+    <result column="Date_enter" jdbcType="VARCHAR" property="dateEnter" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    I_id, I_number, Working_procedure_classification, Category_of_indicators, Indicators_name, 
+    Unit, Indicators_grade, Benchmarking_enterprise, Benchmark_value, Average_reference_value, 
+    Completion_value, Weight, Single_index_capability_index, Process_comprehensive_capability_index, 
+    Series_comprehensive_capability_index, Group_name, Branch_company, Electrolytic_series, 
+    Series_name, `Year`, `Month`, Date_month, Date_enter
+  </sql>
+</mapper>

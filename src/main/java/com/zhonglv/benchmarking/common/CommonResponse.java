@@ -48,6 +48,12 @@ public class CommonResponse extends HashMap<String, Object> {
         return this;
     }
 
+    public CommonResponse invalidParameter(String msg) {
+        put("code", CommonResult.INVALID_PARAM.getCode());
+        put("msg", msg);
+        return this;
+    }
+
     @Override
     public CommonResponse put(String key, Object value) {
         super.put(key, value);

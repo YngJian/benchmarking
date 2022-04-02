@@ -1,7 +1,7 @@
 server:
   port: 8060
   servlet:
-    context-path: /benchmaring
+    context-path: /benchmarking
 
 spring:
   application:
@@ -15,10 +15,10 @@ spring:
         min-idle: 5
         connection-test-query: select 1
       strict: false
-      primary: practice
+      primary: benchmarking
       datasource:
-        practice:
-          url: jdbc:mysql://127.0.0.1:3306/practice?serverTimezone=GMT%2B8
+        benchmarking:
+          url: jdbc:mysql://127.0.0.1:3306/benchmarking?serverTimezone=GMT%2B8
           username: root
           password: 123456
           driver-class-name: com.mysql.cj.jdbc.Driver
@@ -31,3 +31,6 @@ spring:
 
 mybatis:
   mapperLocations: mapper/*.xml
+logging:
+  level:
+    root: debug

@@ -26,11 +26,13 @@ public interface SeriesInfoMapper extends BaseMapper<SeriesInfo> {
      * selectIndicators
      *
      * @param seriesNames seriesNames
+     * @param indicatorsNames indicatorsNames
      * @param startTime startTime
      * @param endTime endTime
      * @return List<Indicators>
      */
     List<Indicators> selectIndicators(@Param("seriesNames") List<String> seriesNames,
+                                      @Param("indicatorsNames") List<String> indicatorsNames,
                                       @Param("startTime") String startTime,
-                                      @Param("endTime")  String endTime);
+                                      @Param("endTime") String endTime);
 }

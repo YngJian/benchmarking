@@ -10,6 +10,7 @@ import com.zhonglv.benchmarking.common.Result;
 import com.zhonglv.benchmarking.domain.entity.SeriesInfo;
 import com.zhonglv.benchmarking.domain.entity.dto.IndicatorsDto;
 import com.zhonglv.benchmarking.domain.entity.dto.UserInfoDto;
+import com.zhonglv.benchmarking.domain.entity.po.ComprehensiveIndex;
 import com.zhonglv.benchmarking.domain.entity.po.IndicatorsPo;
 import com.zhonglv.benchmarking.domain.mapper.SeriesInfoMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -47,24 +48,25 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
     /**
      * 获取系列数据
      *
-     * @param token       token
-     * @param seriesNames seriesNames
-     * @param startTime startTime
-     * @param endTime endTime
+     * @param token           token
+     * @param seriesNames     seriesNames
+     * @param indicatorsNames indicatorsNames
+     * @param startTime       startTime
+     * @param endTime         endTime
      * @return CommonResponse
      */
     @Override
-    public Result<IndicatorsPo> getIndicators(String token, String seriesNames, String startTime, String endTime) {
+    public Result<IndicatorsPo> getIndicators(String token, String seriesNames, String indicatorsNames, String startTime, String endTime) {
         String redis = stringRedisTemplate.opsForValue().get(ConstantType.TOKEN_KEY + token);
         if (StringUtils.isBlank(redis)) {
             log.info("The token has expired.");
-            return new Result<>(CommonResult.INVALID_PARAM.getCode(),"The token has expired.",null);
+            return new Result<>(CommonResult.INVALID_PARAM.getCode(), "The token has expired.", null);
         }
         UserInfoDto userInfoDto = JSONObject.parseObject(redis, UserInfoDto.class);
         List<SeriesInfo> seriesInfoList = userInfoDto.getSeriesInfoList();
         if (CollectionUtil.isEmpty(seriesInfoList)) {
             log.info("This user does not have any data rights!");
-            return new Result<>(CommonResult.INVALID_PARAM.getCode(),"This user does not have any data rights!",null);
+            return new Result<>(CommonResult.INVALID_PARAM.getCode(), "This user does not have any data rights!", null);
         }
 
         Set<String> series = seriesInfoList.stream().map(SeriesInfo::getInfo).collect(Collectors.toSet());
@@ -75,29 +77,91 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
             boolean anyMatch = Arrays.stream(split).anyMatch(s -> !series.contains(s));
             if (anyMatch) {
                 log.info("Please pass in the correct parameter, which contains the unexisted viewing permission!");
-                return new Result<>(CommonResult.INVALID_PARAM.getCode(),"Please pass in the correct parameter, which contains the unexisted viewing permission!",null);
+                return new Result<>(CommonResult.INVALID_PARAM.getCode(), "Please pass in the correct parameter, which contains the unexisted viewing permission!", null);
             }
             seriesNamesList = Arrays.asList(split);
         }
-        List<Indicators> indicatorsList = seriesInfoMapper.selectIndicators(seriesNamesList, startTime, endTime);
 
-        Map<String, List<Indicators>> groupIndicators = getGroupIndicators(Indicators::getSeriesName, indicatorsList);
+        List<String> indicatorsNamesList = new ArrayList<>();
+        if (StringUtils.isNotEmpty(indicatorsNames)) {
+            String[] split = indicatorsNames.split(",");
+            indicatorsNamesList = Arrays.asList(split);
+        }
+
+        List<Indicators> indicatorsList = seriesInfoMapper.selectIndicators(seriesNamesList, indicatorsNamesList, startTime, endTime);
+
+        Map<String, List<IndicatorsDto>> groupIndicators = getGroupIndicators(Indicators::getSeriesName, indicatorsList);
 
         Set<String> groupList = indicatorsList.stream().map(Indicators::getGroupName).collect(Collectors.toSet());
-        List<String> standard = groupList.stream().map(CacheMap.MONTH_MAP::get).collect(Collectors.toList());
-        Map<String, List<Indicators>> standardMap = new HashMap<>();
+        List<String> standard = new ArrayList<>(groupList.size());
+        for (String s : groupList) {
+            standard.add(CacheMap.MODEL_MAP.get(s));
+        }
+
+        Map<String, List<IndicatorsDto>> standardMap = new HashMap<>();
         if (CollectionUtil.isNotEmpty(standard)) {
-            List<Indicators> standardIndicators = seriesInfoMapper.selectIndicators(standard, startTime, endTime);
+            List<Indicators> standardIndicators = seriesInfoMapper.selectIndicators(standard, indicatorsNamesList, startTime, endTime);
             standardMap = getGroupIndicators(Indicators::getGroupName, standardIndicators);
         }
+
+        Map<String, String> map = new HashMap<>();
+        Map<String, Map<String, Map<String, List<IndicatorsDto>>>> standardIndicesMap = new HashMap<>();
+        for (Map.Entry<String, List<IndicatorsDto>> entry : standardMap.entrySet()) {
+            List<IndicatorsDto> value = entry.getValue();
+
+            Map<String, Map<String, List<IndicatorsDto>>> listMap = value.stream().collect(Collectors.groupingBy(indicatorsDto -> indicatorsDto.getDateMonth() + "_" + indicatorsDto.getAbscissa(), Collectors.groupingBy(
+                    IndicatorsDto::getIndicatorsName)));
+            standardIndicesMap.put(entry.getKey(), listMap);
+
+            Map<String, List<IndicatorsDto>> collect = value.stream().collect(Collectors.groupingBy(IndicatorsDto::getDateMonth));
+            for (Map.Entry<String, List<IndicatorsDto>> listEntry : collect.entrySet()) {
+                List<IndicatorsDto> indicatorsDtos = listEntry.getValue();
+                if (CollectionUtil.isNotEmpty(indicatorsDtos)) {
+                    IndicatorsDto indicatorsDto = indicatorsDtos.get(0);
+                    map.put(entry.getKey() + "_" + listEntry.getKey(), indicatorsDto.getSeriesComprehensiveCapabilityIndex());
+                }
+            }
+        }
+
+        Map<String, Map<String, ComprehensiveIndex>> indexMap = new HashMap<>();
+        Map<String, Map<String, Map<String, List<IndicatorsDto>>>> indicesMap = new HashMap<>();
+
+        for (Map.Entry<String, List<IndicatorsDto>> entry : groupIndicators.entrySet()) {
+            List<IndicatorsDto> value = entry.getValue();
+
+            Map<String, Map<String, List<IndicatorsDto>>> listMap = value.stream().collect(Collectors.groupingBy(indicatorsDto -> indicatorsDto.getDateMonth() + "_" + indicatorsDto.getAbscissa(), Collectors.groupingBy(
+                    IndicatorsDto::getIndicatorsName)));
+            indicesMap.put(entry.getKey(), listMap);
+
+            Map<String, List<IndicatorsDto>> collect = value.stream().collect(Collectors.groupingBy(IndicatorsDto::getDateMonth));
+
+            Map<String, ComprehensiveIndex> indexHashMap = new HashMap<>();
+            for (Map.Entry<String, List<IndicatorsDto>> listEntry : collect.entrySet()) {
+                List<IndicatorsDto> indicatorsDtos = listEntry.getValue();
+                if (CollectionUtil.isNotEmpty(indicatorsDtos)) {
+                    IndicatorsDto indicatorsDto = indicatorsDtos.get(0);
+                    ComprehensiveIndex comprehensiveIndex = new ComprehensiveIndex();
+                    comprehensiveIndex.setAbscissa(indicatorsDto.getAbscissa());
+                    comprehensiveIndex.setComprehensiveIndex(indicatorsDto.getSeriesComprehensiveCapabilityIndex());
+                    String standardIndex = map.get(indicatorsDto.getGroupName() + "_" + indicatorsDto.getDateMonth());
+                    comprehensiveIndex.setStandardComprehensiveIndex(standardIndex);
+                    indexHashMap.put(indicatorsDto.getDateMonth() + "_" + indicatorsDto.getAbscissa(), comprehensiveIndex);
+                }
+            }
+            indexMap.put(entry.getKey(), indexHashMap);
+        }
+
         IndicatorsPo indicatorsPo = new IndicatorsPo()
                 .setIndicatorsMap(groupIndicators)
-                .setStandardMap(standardMap);
+                .setStandardMap(standardMap)
+                .setIndexMap(indexMap)
+                .setIndicesMap(indicesMap)
+                .setStandardIndicesMap(standardIndicesMap);
 
         return new Result<IndicatorsPo>().toSuccess(indicatorsPo);
     }
 
-    private Map<String, List<Indicators>> getGroupIndicators(Function<Indicators, String> classifier, List<Indicators> standardIndicators) {
+    private Map<String, List<IndicatorsDto>> getGroupIndicators(Function<Indicators, String> classifier, List<Indicators> standardIndicators) {
         return standardIndicators.stream().collect(
                 Collectors.groupingBy(classifier, Collectors.mapping(indicators -> {
                     IndicatorsDto indicatorsDto = new IndicatorsDto();

@@ -45,5 +45,11 @@
         <if test="endTime != null and endTime != ''">
             <![CDATA[ and ids.Date_month <= #{endTime,jdbcType=TIMESTAMP} ]]>
         </if>
+        <if test="indicatorsNames != null and indicatorsNames.size() > 0 ">
+            and ids.Indicators_name in
+            <foreach item="item" collection="indicatorsNames" open="(" separator="," close=")" index="index">
+               #{item}
+            </foreach>
+        </if>
     </select>
 </mapper>

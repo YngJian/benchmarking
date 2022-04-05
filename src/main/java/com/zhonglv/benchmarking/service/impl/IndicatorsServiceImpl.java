@@ -92,11 +92,14 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
 
         Map<String, List<IndicatorsDto>> groupIndicators = getGroupIndicators(Indicators::getSeriesName, indicatorsList);
 
-        Set<String> groupList = indicatorsList.stream().map(Indicators::getGroupName).collect(Collectors.toSet());
-        List<String> standard = new ArrayList<>(groupList.size());
-        for (String s : groupList) {
-            standard.add(CacheMap.MODEL_MAP.get(s));
-        }
+        Set<String> groupList = indicatorsList.stream()
+                .map(Indicators::getGroupName)
+                .collect(Collectors.toSet());
+
+        List<String> standard = groupList.stream()
+                .filter(s -> CacheMap.MONTH_MAP.get(s) == null)
+                .map(CacheMap.MODEL_MAP::get)
+                .collect(Collectors.toList());
 
         Map<String, List<IndicatorsDto>> standardMap = new HashMap<>();
         if (CollectionUtil.isNotEmpty(standard)) {
@@ -112,7 +115,8 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
             Map<String, List<IndicatorsDto>> listMap = value.stream().collect(Collectors.groupingBy(indicatorsDto -> indicatorsDto.getDateMonth() + "_" + indicatorsDto.getAbscissa()));
             standardIndicesMap.put(entry.getKey(), listMap);
 
-            Map<String, List<IndicatorsDto>> collect = value.stream().collect(Collectors.groupingBy(IndicatorsDto::getDateMonth));
+            Map<String, List<IndicatorsDto>> collect = value.stream()
+                    .collect(Collectors.groupingBy(IndicatorsDto::getDateMonth));
             for (Map.Entry<String, List<IndicatorsDto>> listEntry : collect.entrySet()) {
                 List<IndicatorsDto> indicatorsDtos = listEntry.getValue();
                 if (CollectionUtil.isNotEmpty(indicatorsDtos)) {

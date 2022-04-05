@@ -105,12 +105,11 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
         }
 
         Map<String, String> map = new HashMap<>();
-        Map<String, Map<String, Map<String, List<IndicatorsDto>>>> standardIndicesMap = new HashMap<>();
+        Map<String, Map<String, List<IndicatorsDto>>> standardIndicesMap = new HashMap<>();
         for (Map.Entry<String, List<IndicatorsDto>> entry : standardMap.entrySet()) {
             List<IndicatorsDto> value = entry.getValue();
 
-            Map<String, Map<String, List<IndicatorsDto>>> listMap = value.stream().collect(Collectors.groupingBy(indicatorsDto -> indicatorsDto.getDateMonth() + "_" + indicatorsDto.getAbscissa(), Collectors.groupingBy(
-                    IndicatorsDto::getIndicatorsName)));
+            Map<String, List<IndicatorsDto>> listMap = value.stream().collect(Collectors.groupingBy(indicatorsDto -> indicatorsDto.getDateMonth() + "_" + indicatorsDto.getAbscissa()));
             standardIndicesMap.put(entry.getKey(), listMap);
 
             Map<String, List<IndicatorsDto>> collect = value.stream().collect(Collectors.groupingBy(IndicatorsDto::getDateMonth));
@@ -124,13 +123,12 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
         }
 
         Map<String, Map<String, ComprehensiveIndex>> indexMap = new HashMap<>();
-        Map<String, Map<String, Map<String, List<IndicatorsDto>>>> indicesMap = new HashMap<>();
+        Map<String, Map<String, List<IndicatorsDto>>> indicesMap = new HashMap<>();
 
         for (Map.Entry<String, List<IndicatorsDto>> entry : groupIndicators.entrySet()) {
             List<IndicatorsDto> value = entry.getValue();
 
-            Map<String, Map<String, List<IndicatorsDto>>> listMap = value.stream().collect(Collectors.groupingBy(indicatorsDto -> indicatorsDto.getDateMonth() + "_" + indicatorsDto.getAbscissa(), Collectors.groupingBy(
-                    IndicatorsDto::getIndicatorsName)));
+            Map<String, List<IndicatorsDto>> listMap = value.stream().collect(Collectors.groupingBy(indicatorsDto -> indicatorsDto.getDateMonth() + "_" + indicatorsDto.getAbscissa()));
             indicesMap.put(entry.getKey(), listMap);
 
             Map<String, List<IndicatorsDto>> collect = value.stream().collect(Collectors.groupingBy(IndicatorsDto::getDateMonth));

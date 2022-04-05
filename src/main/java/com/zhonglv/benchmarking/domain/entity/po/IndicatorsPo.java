@@ -30,8 +30,8 @@ public class IndicatorsPo {
     @ApiModelProperty(value = "按月的综合系数")
     Map<String, Map<String, ComprehensiveIndex>> indexMap;
     @ApiModelProperty(value = "按月按指标时间数据")
-    Map<String, Map<String, Map<String, List<IndicatorsDto>>>> indicesMap;
+    Map<String, Map<String, List<IndicatorsDto>>> indicesMap;
     @ApiModelProperty(value = "按月按指标时间的标准数据")
-    Map<String, Map<String, Map<String, List<IndicatorsDto>>>> standardIndicesMap;
+    Map<String, Map<String, List<IndicatorsDto>>> standardIndicesMap;
 
 }

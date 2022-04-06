@@ -91,7 +91,8 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
             indicatorsNamesList = Arrays.asList(split);
         }
 
-        List<Indicators> indicatorsList = seriesInfoMapper.selectIndicators(seriesNamesList, indicatorsNamesList, startTime, endTime);
+        List<Indicators> indicatorsList = seriesInfoMapper.selectIndicators(seriesNamesList, indicatorsNamesList,
+                startTime, endTime);
 
         Map<String, List<IndicatorsDto>> groupIndicators = getGroupIndicators(Indicators::getSeriesName, indicatorsList);
 
@@ -106,26 +107,34 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
 
         Map<String, List<IndicatorsDto>> standardMap = new HashMap<>();
         if (CollectionUtil.isNotEmpty(standard)) {
-            List<Indicators> standardIndicators = seriesInfoMapper.selectIndicators(standard, indicatorsNamesList, startTime, endTime);
+            List<Indicators> standardIndicators = seriesInfoMapper.selectIndicators(standard, indicatorsNamesList,
+                    startTime, endTime);
             standardMap = getGroupIndicators(Indicators::getGroupName, standardIndicators);
         }
 
-        Map<String, String> map = new HashMap<>();
-        Map<String, Map<String, List<IndicatorsDto>>> standardIndicesMap = new HashMap<>();
+        Map<String, String> map = new TreeMap<>();
+        Map<String, Map<String, List<IndicatorsDto>>> standardIndicesMap = new TreeMap<>();
         assemblyMap(standardMap, map, standardIndicesMap);
 
-        Map<String, Map<String, ComprehensiveIndex>> indexMap = new HashMap<>();
-        Map<String, Map<String, List<IndicatorsDto>>> indicesMap = new HashMap<>();
+        Map<String, Map<String, ComprehensiveIndex>> indexMap = new TreeMap<>();
+        Map<String, Map<String, List<IndicatorsDto>>> indicesMap = new TreeMap<>();
 
         for (Map.Entry<String, List<IndicatorsDto>> entry : groupIndicators.entrySet()) {
             List<IndicatorsDto> value = entry.getValue();
 
-            Map<String, List<IndicatorsDto>> listMap = value.stream().collect(Collectors.groupingBy(indicatorsDto -> indicatorsDto.getDateMonth() + "_" + indicatorsDto.getAbscissa()));
+            Map<String, List<IndicatorsDto>> listMap = value.stream()
+                    .collect(Collectors.groupingBy(
+                            indicatorsDto -> indicatorsDto.getDateMonth() + "_" + indicatorsDto.getAbscissa(),
+                            TreeMap::new,
+                            Collectors.toList()));
             indicesMap.put(entry.getKey(), listMap);
 
-            Map<String, List<IndicatorsDto>> collect = value.stream().collect(Collectors.groupingBy(IndicatorsDto::getDateMonth));
+            Map<String, List<IndicatorsDto>> collect = value.stream()
+                    .collect(Collectors.groupingBy(IndicatorsDto::getDateMonth,
+                            TreeMap::new,
+                            Collectors.toList()));
 
-            Map<String, ComprehensiveIndex> indexHashMap = new HashMap<>();
+            Map<String, ComprehensiveIndex> indexHashMap = new TreeMap<>();
             for (Map.Entry<String, List<IndicatorsDto>> listEntry : collect.entrySet()) {
                 List<IndicatorsDto> indicatorsDtos = listEntry.getValue();
                 if (CollectionUtil.isNotEmpty(indicatorsDtos)) {
@@ -151,15 +160,21 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
         return new Result<IndicatorsPo>().toSuccess(indicatorsPo);
     }
 
-    private void assemblyMap(Map<String, List<IndicatorsDto>> standardMap, Map<String, String> map, Map<String, Map<String, List<IndicatorsDto>>> standardIndicesMap) {
+    private void assemblyMap(Map<String, List<IndicatorsDto>> standardMap, Map<String, String> map,
+                             Map<String, Map<String, List<IndicatorsDto>>> standardIndicesMap) {
         for (Map.Entry<String, List<IndicatorsDto>> entry : standardMap.entrySet()) {
             List<IndicatorsDto> value = entry.getValue();
 
-            Map<String, List<IndicatorsDto>> listMap = value.stream().collect(Collectors.groupingBy(indicatorsDto -> indicatorsDto.getDateMonth() + "_" + indicatorsDto.getAbscissa()));
+            Map<String, List<IndicatorsDto>> listMap = value.stream().collect(
+                    Collectors.groupingBy(indicatorsDto -> indicatorsDto.getDateMonth() + "_" + indicatorsDto.getAbscissa(),
+                            TreeMap::new,
+                            Collectors.toList()));
             standardIndicesMap.put(entry.getKey(), listMap);
 
             Map<String, List<IndicatorsDto>> collect = value.stream()
-                    .collect(Collectors.groupingBy(IndicatorsDto::getDateMonth));
+                    .collect(Collectors.groupingBy(IndicatorsDto::getDateMonth,
+                            TreeMap::new,
+                            Collectors.toList()));
             for (Map.Entry<String, List<IndicatorsDto>> listEntry : collect.entrySet()) {
                 List<IndicatorsDto> indicatorsDtos = listEntry.getValue();
                 if (CollectionUtil.isNotEmpty(indicatorsDtos)) {

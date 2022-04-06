@@ -23,6 +23,9 @@ public class ComprehensiveIndex {
     @ApiModelProperty(value = "横坐标月份")
     private String abscissa;
 
+    @ApiModelProperty(value = "时间")
+    private String dateMouth;
+
     @ApiModelProperty(value = "综合指数")
     private String comprehensiveIndex;
 

@@ -141,6 +141,7 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
                     IndicatorsDto indicatorsDto = indicatorsDtos.get(0);
                     ComprehensiveIndex comprehensiveIndex = new ComprehensiveIndex();
                     comprehensiveIndex.setAbscissa(indicatorsDto.getAbscissa());
+                    comprehensiveIndex.setDateMouth(indicatorsDto.getDateMonth());
                     comprehensiveIndex.setComprehensiveIndex(indicatorsDto.getSeriesComprehensiveCapabilityIndex());
                     String standardIndex = map.get(indicatorsDto.getGroupName() + "_" + indicatorsDto.getDateMonth());
                     comprehensiveIndex.setStandardComprehensiveIndex(standardIndex);
@@ -148,7 +149,7 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
                 }
             }
             List<ComprehensiveIndex> comprehensiveIndexList = indexHashMap.values().stream()
-                    .sorted(Comparator.comparing(ComprehensiveIndex::getAbscissa))
+                    .sorted(Comparator.comparing(ComprehensiveIndex::getDateMouth))
                     .collect(Collectors.toList());
             indexMap.put(entry.getKey(), comprehensiveIndexList);
         }

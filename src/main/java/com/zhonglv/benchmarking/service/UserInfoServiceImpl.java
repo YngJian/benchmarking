@@ -3,7 +3,6 @@ package com.zhonglv.benchmarking.service;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zhonglv.benchmarking.common.CommonResult;
 import com.zhonglv.benchmarking.common.ConstantType;
 import com.zhonglv.benchmarking.common.Result;
 import com.zhonglv.benchmarking.domain.entity.SeriesInfo;
@@ -21,8 +20,9 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author yangj
@@ -62,13 +62,13 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         }
         // 查询用户信息和数据权限
         List<SeriesInfo> seriesInfoList = seriesInfoMapper.selectSeriesByGroupId(userInfo.getGroupId());
-
+        Map<String, List<SeriesInfo>> listMap = seriesInfoList.stream().collect(Collectors.groupingBy(seriesInfo -> String.valueOf(seriesInfo.getSeriesType())));
         // 生成token
         String token = JwtUtils.generateToken(userInfo.getUserName());
 
         UserInfoDto userInfoDto = new UserInfoDto();
         BeanUtils.copyProperties(userInfo, userInfoDto);
-        userInfoDto.setSeriesInfoList(seriesInfoList);
+        userInfoDto.setSeriesMap(listMap);
 
         // 设置redis
         stringRedisTemplate.opsForValue().set(ConstantType.TOKEN_KEY + token,

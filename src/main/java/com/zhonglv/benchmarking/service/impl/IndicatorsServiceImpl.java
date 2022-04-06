@@ -3,27 +3,26 @@ package com.zhonglv.benchmarking.service.impl;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zhonglv.benchmarking.common.CacheMap;
 import com.zhonglv.benchmarking.common.CommonResult;
 import com.zhonglv.benchmarking.common.ConstantType;
 import com.zhonglv.benchmarking.common.Result;
+import com.zhonglv.benchmarking.domain.entity.Indicators;
 import com.zhonglv.benchmarking.domain.entity.SeriesInfo;
 import com.zhonglv.benchmarking.domain.entity.dto.IndicatorsDto;
 import com.zhonglv.benchmarking.domain.entity.dto.UserInfoDto;
 import com.zhonglv.benchmarking.domain.entity.po.ComprehensiveIndex;
 import com.zhonglv.benchmarking.domain.entity.po.IndicatorsPo;
+import com.zhonglv.benchmarking.domain.mapper.IndicatorsMapper;
 import com.zhonglv.benchmarking.domain.mapper.SeriesInfoMapper;
+import com.zhonglv.benchmarking.service.IndicatorsService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zhonglv.benchmarking.domain.entity.Indicators;
-import com.zhonglv.benchmarking.domain.mapper.IndicatorsMapper;
-import com.zhonglv.benchmarking.service.IndicatorsService;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -63,7 +62,11 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
             return new Result<>(CommonResult.INVALID_PARAM.getCode(), "The token has expired.", null);
         }
         UserInfoDto userInfoDto = JSONObject.parseObject(redis, UserInfoDto.class);
-        List<SeriesInfo> seriesInfoList = userInfoDto.getSeriesInfoList();
+        List<SeriesInfo> seriesInfoList = new ArrayList<>();
+        Map<String, List<SeriesInfo>> seriesMap = userInfoDto.getSeriesMap();
+        for (Map.Entry<String, List<SeriesInfo>> map : seriesMap.entrySet()) {
+            seriesInfoList.addAll(map.getValue());
+        }
         if (CollectionUtil.isEmpty(seriesInfoList)) {
             log.info("This user does not have any data rights!");
             return new Result<>(CommonResult.INVALID_PARAM.getCode(), "This user does not have any data rights!", null);
@@ -109,22 +112,7 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
 
         Map<String, String> map = new HashMap<>();
         Map<String, Map<String, List<IndicatorsDto>>> standardIndicesMap = new HashMap<>();
-        for (Map.Entry<String, List<IndicatorsDto>> entry : standardMap.entrySet()) {
-            List<IndicatorsDto> value = entry.getValue();
-
-            Map<String, List<IndicatorsDto>> listMap = value.stream().collect(Collectors.groupingBy(indicatorsDto -> indicatorsDto.getDateMonth() + "_" + indicatorsDto.getAbscissa()));
-            standardIndicesMap.put(entry.getKey(), listMap);
-
-            Map<String, List<IndicatorsDto>> collect = value.stream()
-                    .collect(Collectors.groupingBy(IndicatorsDto::getDateMonth));
-            for (Map.Entry<String, List<IndicatorsDto>> listEntry : collect.entrySet()) {
-                List<IndicatorsDto> indicatorsDtos = listEntry.getValue();
-                if (CollectionUtil.isNotEmpty(indicatorsDtos)) {
-                    IndicatorsDto indicatorsDto = indicatorsDtos.get(0);
-                    map.put(entry.getKey() + "_" + listEntry.getKey(), indicatorsDto.getSeriesComprehensiveCapabilityIndex());
-                }
-            }
-        }
+        assemblyMap(standardMap, map, standardIndicesMap);
 
         Map<String, Map<String, ComprehensiveIndex>> indexMap = new HashMap<>();
         Map<String, Map<String, List<IndicatorsDto>>> indicesMap = new HashMap<>();
@@ -161,6 +149,25 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
                 .setStandardIndicesMap(standardIndicesMap);
 
         return new Result<IndicatorsPo>().toSuccess(indicatorsPo);
+    }
+
+    private void assemblyMap(Map<String, List<IndicatorsDto>> standardMap, Map<String, String> map, Map<String, Map<String, List<IndicatorsDto>>> standardIndicesMap) {
+        for (Map.Entry<String, List<IndicatorsDto>> entry : standardMap.entrySet()) {
+            List<IndicatorsDto> value = entry.getValue();
+
+            Map<String, List<IndicatorsDto>> listMap = value.stream().collect(Collectors.groupingBy(indicatorsDto -> indicatorsDto.getDateMonth() + "_" + indicatorsDto.getAbscissa()));
+            standardIndicesMap.put(entry.getKey(), listMap);
+
+            Map<String, List<IndicatorsDto>> collect = value.stream()
+                    .collect(Collectors.groupingBy(IndicatorsDto::getDateMonth));
+            for (Map.Entry<String, List<IndicatorsDto>> listEntry : collect.entrySet()) {
+                List<IndicatorsDto> indicatorsDtos = listEntry.getValue();
+                if (CollectionUtil.isNotEmpty(indicatorsDtos)) {
+                    IndicatorsDto indicatorsDto = indicatorsDtos.get(0);
+                    map.put(entry.getKey() + "_" + listEntry.getKey(), indicatorsDto.getSeriesComprehensiveCapabilityIndex());
+                }
+            }
+        }
     }
 
     private Map<String, List<IndicatorsDto>> getGroupIndicators(Function<Indicators, String> classifier, List<Indicators> standardIndicators) {

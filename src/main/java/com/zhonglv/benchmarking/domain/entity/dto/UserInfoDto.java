@@ -1,21 +1,17 @@
 package com.zhonglv.benchmarking.domain.entity.dto;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.zhonglv.benchmarking.domain.entity.SeriesInfo;
 import com.zhonglv.benchmarking.domain.entity.UserGroup;
-import com.zhonglv.benchmarking.domain.entity.UserInfo;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author yangj
@@ -73,5 +69,5 @@ public class UserInfoDto {
     private UserGroup userGroup;
 
     @ApiModelProperty(value = "系列列表")
-    private List<SeriesInfo> seriesInfoList;
+    private Map<String, List<SeriesInfo>> seriesMap;
 }

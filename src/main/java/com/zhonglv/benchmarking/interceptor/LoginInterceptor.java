@@ -7,6 +7,7 @@ import com.zhonglv.benchmarking.utils.JwtUtils;
 import io.jsonwebtoken.Claims;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
@@ -14,6 +15,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.regex.Pattern;
 
 /**
  * @author : Yang Jian
@@ -24,12 +26,27 @@ public class LoginInterceptor implements HandlerInterceptor {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
+    @Value("${auth.no-token-path}")
+    private String noToken;
+
+    private String regex;
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws UnLoginException {
         if (handler instanceof HandlerMethod) {
             HandlerMethod method = (HandlerMethod) handler;
             UnLoginLimit unlimited = method.getMethodAnnotation(UnLoginLimit.class);
-            if (unlimited != null) {
+
+            if (StringUtils.isBlank(regex)) {
+                regex = JwtUtils.getRegStr(noToken);
+            }
+
+            String requestUri = request.getRequestURI();
+            if (StringUtils.isNotBlank(requestUri)) {
+                requestUri = requestUri.replace(request.getContextPath(), "");
+            }
+
+            if (unlimited != null || Pattern.compile(regex).matcher(requestUri).matches()) {
                 // 免登陆接口
                 return true;
             } else {

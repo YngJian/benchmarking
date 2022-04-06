@@ -5,6 +5,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -53,6 +54,29 @@ public class JwtUtils {
      */
     public static boolean isTokenExpired(Date expiration) {
         return expiration.before(new Date());
+    }
+
+    /**
+     * 将传递进来的不需要过滤得路径集合的字符串格式化成一系列的正则规则
+     *
+     * @param str 不需要过滤的路径集合
+     * @return 正则表达式规则
+     */
+    public static String getRegStr(String str) {
+        if (StringUtils.isNotBlank(str)) {
+            String[] excludes = str.split(";");
+            int length = excludes.length;
+            for (int i = 0; i < length; i++) {
+                String tmpExclude = excludes[i];
+                //对点、反斜杠和星号进行转义
+                tmpExclude = tmpExclude.replace("\\", "\\\\").replace(".", "\\.").replace("*", ".*");
+
+                tmpExclude = "^" + tmpExclude + "$";
+                excludes[i] = tmpExclude;
+            }
+            return StringUtils.join(excludes, "|");
+        }
+        return str;
     }
 
 }

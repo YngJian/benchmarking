@@ -116,7 +116,7 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
         Map<String, Map<String, List<IndicatorsDto>>> standardIndicesMap = new TreeMap<>();
         assemblyMap(standardMap, map, standardIndicesMap);
 
-        Map<String, Map<String, ComprehensiveIndex>> indexMap = new TreeMap<>();
+        Map<String, List<ComprehensiveIndex>> indexMap = new TreeMap<>();
         Map<String, Map<String, List<IndicatorsDto>>> indicesMap = new TreeMap<>();
 
         for (Map.Entry<String, List<IndicatorsDto>> entry : groupIndicators.entrySet()) {
@@ -147,7 +147,10 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
                     indexHashMap.put(indicatorsDto.getDateMonth() + "_" + indicatorsDto.getAbscissa(), comprehensiveIndex);
                 }
             }
-            indexMap.put(entry.getKey(), indexHashMap);
+            List<ComprehensiveIndex> comprehensiveIndexList = indexHashMap.values().stream()
+                    .sorted(Comparator.comparing(ComprehensiveIndex::getAbscissa))
+                    .collect(Collectors.toList());
+            indexMap.put(entry.getKey(), comprehensiveIndexList);
         }
 
         IndicatorsPo indicatorsPo = new IndicatorsPo()

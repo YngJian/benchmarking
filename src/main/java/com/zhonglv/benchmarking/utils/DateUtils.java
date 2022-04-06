@@ -1,7 +1,5 @@
 package com.zhonglv.benchmarking.utils;
 
-import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -10,7 +8,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 import java.util.Date;
-import java.util.Optional;
 
 /**
  * @author : Yang Jian
@@ -76,5 +73,19 @@ public class DateUtils {
         ZoneId zoneId = ZoneId.systemDefault();
         ZonedDateTime zdt = localDateTime.atZone(zoneId);
         return Date.from(zdt.toInstant());
+    }
+
+    /**
+     * 获取间隔月份
+     *
+     * @param date     date
+     * @param format   format
+     * @param interval interval
+     * @return date
+     */
+    public static String getIntervalMonthTime(LocalDate date, String format, Integer interval) {
+        date = date.minusMonths(interval);
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern(format);
+        return date.format(fmt);
     }
 }

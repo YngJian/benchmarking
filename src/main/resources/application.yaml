@@ -34,3 +34,6 @@ mybatis:
 logging:
   level:
     root: debug
+
+auth:
+  no-token-path: /login;/logout;/swagger-ui.html;/swagger-resources;/v2/api-docs;/configuration/security;/configuration/ui;/doc.html;/webjars/**;/favicon.ico;/v3/**

@@ -1,6 +1,5 @@
 package com.zhonglv.benchmarking.controller;
 
-import com.zhonglv.benchmarking.common.CommonResult;
 import com.zhonglv.benchmarking.common.Result;
 import com.zhonglv.benchmarking.domain.entity.po.IndicatorsPo;
 import com.zhonglv.benchmarking.service.IndicatorsService;
@@ -10,11 +9,12 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotBlank;
-import java.util.List;
+import java.time.LocalDate;
 
 /**
  * @author yangj
@@ -46,6 +46,11 @@ public class IndicatorsController {
         if (!DateUtils.correctDateParam(DATE_PATTEN, startTime, endTime)) {
             log.info("Invalid time parameter.startProTime:{},endProTime:{}", startTime, endTime);
             return new Result<IndicatorsPo>().toInvalidParam("Invalid time parameter.");
+        }
+        if (StringUtils.isBlank(startTime) && StringUtils.isBlank(endTime)) {
+            String defaultTime = DateUtils.getIntervalMonthTime(LocalDate.now(), DATE_PATTEN, 1);
+            startTime = defaultTime;
+            endTime = defaultTime;
         }
         return indicatorsService.getIndicators(token, seriesNames, indicatorsNames, startTime, endTime);
     }

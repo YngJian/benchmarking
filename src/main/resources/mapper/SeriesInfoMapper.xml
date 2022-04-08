@@ -35,21 +35,28 @@
         from t_series_info tsi
         inner join indicators ids
         on tsi.info = ids.series_name
-        where tsi.info in
-        <foreach item="item" collection="seriesNames" open="(" separator="," close=")" index="index">
-            #{item}
-        </foreach>
-        <if test="startTime != null and startTime != ''">
-            <![CDATA[ and ids.Date_month >= #{startTime,jdbcType=TIMESTAMP} ]]>
-        </if>
-        <if test="endTime != null and endTime != ''">
-            <![CDATA[ and ids.Date_month <= #{endTime,jdbcType=TIMESTAMP} ]]>
-        </if>
-        <if test="indicatorsNames != null and indicatorsNames.size() > 0 ">
-            and ids.Indicators_name in
-            <foreach item="item" collection="indicatorsNames" open="(" separator="," close=")" index="index">
-               #{item}
-            </foreach>
-        </if>
+        <where>
+            <if test="seriesNames != null and seriesNames.size() > 0 ">
+                and tsi.info in
+                <foreach item="item" collection="seriesNames" open="(" separator="," close=")" index="index">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="startTime != null and startTime != ''">
+                <![CDATA[ and ids.Date_month >= #{startTime,jdbcType=TIMESTAMP} ]]>
+            </if>
+            <if test="endTime != null and endTime != ''">
+                <![CDATA[ and ids.Date_month <= #{endTime,jdbcType=TIMESTAMP} ]]>
+            </if>
+            <if test="indicatorsNames != null and indicatorsNames.size() > 0 ">
+                and ids.Indicators_name in
+                <foreach item="item" collection="indicatorsNames" open="(" separator="," close=")" index="index">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="seriesType != null and seriesType != ''">
+                and tsi.series_type = #{seriesType,jdbcType=VARCHAR}
+            </if>
+        </where>
     </select>
 </mapper>

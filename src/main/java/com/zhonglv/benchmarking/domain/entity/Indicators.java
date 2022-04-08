@@ -1,5 +1,6 @@
 package com.zhonglv.benchmarking.domain.entity;
 
+import com.alibaba.excel.annotation.ExcelProperty;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -33,6 +34,7 @@ public class Indicators {
      */
     @TableField(value = "I_number")
     @ApiModelProperty(value = "三级指标序号", name = "inumber")
+    @ExcelProperty("序号")
     private String iNumber;
 
     /**
@@ -40,6 +42,7 @@ public class Indicators {
      */
     @TableField(value = "Working_procedure_classification")
     @ApiModelProperty(value = "工序分类")
+    @ExcelProperty("工序分类")
     private String workingProcedureClassification;
 
     /**
@@ -47,6 +50,7 @@ public class Indicators {
      */
     @TableField(value = "Category_of_indicators")
     @ApiModelProperty(value = "指标类别")
+    @ExcelProperty("指标类别")
     private String categoryOfIndicators;
 
     /**
@@ -54,6 +58,7 @@ public class Indicators {
      */
     @TableField(value = "Indicators_name")
     @ApiModelProperty(value = "指标")
+    @ExcelProperty("指标")
     private String indicatorsName;
 
     /**
@@ -61,6 +66,7 @@ public class Indicators {
      */
     @TableField(value = "Unit")
     @ApiModelProperty(value = "单位")
+    @ExcelProperty("单位")
     private String unit;
 
     /**
@@ -68,6 +74,7 @@ public class Indicators {
      */
     @TableField(value = "Indicators_grade")
     @ApiModelProperty(value = "指标等级")
+    @ExcelProperty("指标等级")
     private String indicatorsGrade;
 
     /**
@@ -75,6 +82,7 @@ public class Indicators {
      */
     @TableField(value = "Benchmarking_enterprise")
     @ApiModelProperty(value = "标杆企业")
+    @ExcelProperty("标杆企业")
     private String benchmarkingEnterprise;
 
     /**
@@ -82,6 +90,7 @@ public class Indicators {
      */
     @TableField(value = "Benchmark_value")
     @ApiModelProperty(value = "标杆值")
+    @ExcelProperty(index = 6)
     private String benchmarkValue;
 
     /**
@@ -89,6 +98,7 @@ public class Indicators {
      */
     @TableField(value = "Average_reference_value")
     @ApiModelProperty(value = "公司年平均水平基准值")
+    @ExcelProperty("公司年平均水平基准值")
     private String averageReferenceValue;
 
     /**
@@ -96,6 +106,7 @@ public class Indicators {
      */
     @TableField(value = "Completion_value")
     @ApiModelProperty(value = "完成值")
+    @ExcelProperty(index = 7)
     private String completionValue;
 
     /**
@@ -103,6 +114,7 @@ public class Indicators {
      */
     @TableField(value = "Weight")
     @ApiModelProperty(value = "权重")
+    @ExcelProperty("权重")
     private String weight;
 
     /**
@@ -110,6 +122,7 @@ public class Indicators {
      */
     @TableField(value = "Single_index_capability_index")
     @ApiModelProperty(value = "单项指标能力指数")
+    @ExcelProperty("单项指标能力指数")
     private String singleIndexCapabilityIndex;
 
     /**
@@ -117,6 +130,7 @@ public class Indicators {
      */
     @TableField(value = "Process_comprehensive_capability_index")
     @ApiModelProperty(value = "工序综合能力指数")
+    @ExcelProperty("工序综合能力指数")
     private String processComprehensiveCapabilityIndex;
 
     /**
@@ -124,6 +138,7 @@ public class Indicators {
      */
     @TableField(value = "Series_comprehensive_capability_index")
     @ApiModelProperty(value = "系列综合能力指数")
+    @ExcelProperty("系列综合能力指数")
     private String seriesComprehensiveCapabilityIndex;
 
     /**

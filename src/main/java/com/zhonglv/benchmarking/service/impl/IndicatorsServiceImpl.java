@@ -2,6 +2,10 @@ package com.zhonglv.benchmarking.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.write.builder.ExcelWriterBuilder;
+import com.alibaba.excel.write.merge.OnceAbsoluteMergeStrategy;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zhonglv.benchmarking.common.CacheMap;
@@ -13,18 +17,23 @@ import com.zhonglv.benchmarking.domain.entity.SeriesInfo;
 import com.zhonglv.benchmarking.domain.entity.dto.IndicatorsDto;
 import com.zhonglv.benchmarking.domain.entity.dto.UserInfoDto;
 import com.zhonglv.benchmarking.domain.entity.po.ComprehensiveIndex;
+import com.zhonglv.benchmarking.domain.entity.po.IndicatorsExcelDto;
 import com.zhonglv.benchmarking.domain.entity.po.IndicatorsPo;
 import com.zhonglv.benchmarking.domain.mapper.IndicatorsMapper;
 import com.zhonglv.benchmarking.domain.mapper.SeriesInfoMapper;
 import com.zhonglv.benchmarking.service.IndicatorsService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -91,7 +100,7 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
             indicatorsNamesList = Arrays.asList(split);
         }
 
-        List<Indicators> indicatorsList = seriesInfoMapper.selectIndicators(seriesNamesList, indicatorsNamesList,
+        List<Indicators> indicatorsList = seriesInfoMapper.selectIndicators(seriesNamesList, indicatorsNamesList, null,
                 startTime, endTime);
 
         Map<String, List<IndicatorsDto>> groupIndicators = getGroupIndicators(Indicators::getSeriesName, indicatorsList);
@@ -107,7 +116,7 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
 
         Map<String, List<IndicatorsDto>> standardMap = new HashMap<>();
         if (CollectionUtil.isNotEmpty(standard)) {
-            List<Indicators> standardIndicators = seriesInfoMapper.selectIndicators(standard, indicatorsNamesList,
+            List<Indicators> standardIndicators = seriesInfoMapper.selectIndicators(standard, indicatorsNamesList, null,
                     startTime, endTime);
             standardMap = getGroupIndicators(Indicators::getGroupName, standardIndicators);
         }
@@ -218,6 +227,123 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
         BigDecimal b1 = new BigDecimal(v1);
         BigDecimal b2 = new BigDecimal(v2);
         return b1.subtract(b2).doubleValue();
+    }
+
+    /**
+     * 获取系列数据
+     *
+     * @param token           token
+     * @param indicatorsNames indicatorsNames
+     * @param seriesType      seriesType
+     * @param startTime       startTime
+     * @param endTime         endTime
+     * @return CommonResponse
+     */
+    @Override
+    public Result<IndicatorsPo> getIndicatorsByType(String token, String indicatorsNames, String seriesType, String startTime, String endTime) {
+        List<String> indicatorsNamesList = new ArrayList<>();
+        if (StringUtils.isNotEmpty(indicatorsNames)) {
+            String[] split = indicatorsNames.split(",");
+            indicatorsNamesList = Arrays.asList(split);
+        }
+
+        List<Indicators> indicatorsList = seriesInfoMapper.selectIndicators(null, indicatorsNamesList, seriesType,
+                startTime, endTime);
+        Map<String, Map<String, List<IndicatorsDto>>> stringMapMap = indicatorsList.stream()
+                .collect(Collectors.groupingBy(Indicators::getGroupName,
+                        Collectors.groupingBy(Indicators::getSeriesName, Collectors.mapping(indicators -> {
+                            IndicatorsDto indicatorsDto = new IndicatorsDto();
+                            BeanUtils.copyProperties(indicators, indicatorsDto);
+                            return indicatorsDto;
+                        }, Collectors.toList()))));
+
+        return new Result<IndicatorsPo>().toSuccess(new IndicatorsPo().setIndicesMap(stringMapMap));
+    }
+
+    /**
+     * download
+     *
+     * @param token      token
+     * @param seriesName seriesName
+     * @param startTime  startTime
+     * @param endTime    endTime
+     * @param response   response
+     */
+    @Override
+    public void download(String token, String seriesName, String startTime, String endTime, HttpServletResponse response) throws IOException {
+        Result<IndicatorsPo> indicators = getIndicators(token, seriesName, null, startTime, endTime);
+        if (!CommonResult.SUCCESS.getCode().equals(indicators.getCode())) {
+            response.setContentType("application/json");
+            response.setCharacterEncoding("utf-8");
+            response.getOutputStream().println(JSON.toJSONString(indicators));
+        }
+        Map<String, List<IndicatorsDto>> indicatorsMap = indicators.getData().getIndicatorsMap();
+        List<IndicatorsDto> indicatorsDtoList = indicatorsMap.get(seriesName);
+
+        List<IndicatorsExcelDto> indicatorsExcelDtos = new ArrayList<>(indicatorsDtoList.size());
+        indicatorsDtoList.stream().sorted(Comparator.comparing(Indicators::getINumber)).forEachOrdered(indicatorsDto -> {
+            IndicatorsExcelDto indicatorsExcelDto = new IndicatorsExcelDto();
+            BeanUtils.copyProperties(indicatorsDto, indicatorsExcelDto);
+            indicatorsExcelDtos.add(indicatorsExcelDto);
+        });
+
+        Map<String, Long> workMap = indicatorsExcelDtos.stream()
+                .collect(Collectors.groupingBy(IndicatorsExcelDto::getWorkingProcedureClassification, Collectors.counting()));
+        LinkedList<Long> longs = new LinkedList<>(workMap.values());
+        List<OnceAbsoluteMergeStrategy> mergeStrategies = new LinkedList<>();
+        int sum = 2;
+        for (int i = 0; i < longs.size(); i++) {
+            OnceAbsoluteMergeStrategy onceAbsoluteMergeStrategy;
+            if (i == 0) {
+                onceAbsoluteMergeStrategy = new OnceAbsoluteMergeStrategy(2, Math.toIntExact(longs.get(i)), 1, 1);
+            } else {
+                onceAbsoluteMergeStrategy = new OnceAbsoluteMergeStrategy(sum + 1, sum + Math.toIntExact(longs.get(i)), 1, 1);
+            }
+            sum += Math.toIntExact(longs.get(i));
+            mergeStrategies.add(onceAbsoluteMergeStrategy);
+        }
+
+        Map<String, Long> categoryMap = indicatorsExcelDtos.stream()
+                .collect(Collectors.groupingBy(IndicatorsExcelDto::getCategoryOfIndicators, Collectors.counting()));
+
+        // 这里注意 有同学反应使用swagger 会导致各种问题，请直接用浏览器或者用postman
+        try {
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setCharacterEncoding("utf-8");
+            // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
+            String fileName = URLEncoder.encode(seriesName, "UTF-8").replaceAll("\\+", "%20");
+            response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + System.currentTimeMillis() + ".xlsx");
+            // 这里需要设置不关闭流
+            ExcelWriterBuilder write = EasyExcel.write(response.getOutputStream(), IndicatorsExcelDto.class);
+            mergeStrategies.forEach(write::registerWriteHandler);
+            write.head(head(seriesName)).autoCloseStream(Boolean.FALSE).sheet(seriesName).doWrite(indicatorsExcelDtos);
+        } catch (Exception e) {
+            // 重置response
+            response.reset();
+            response.setContentType("application/json");
+            response.setCharacterEncoding("utf-8");
+            Result<IndicatorsPo> result = new Result<IndicatorsPo>().toFailed("Download file failed " + e.getMessage());
+            response.getOutputStream().println(JSON.toJSONString(result));
+        }
+    }
+
+    private static List<List<String>> head(String seriesName) {
+        List<List<String>> headTitles = Lists.newArrayList();
+
+        headTitles.add(Arrays.asList(seriesName, seriesName, "序号"));
+        headTitles.add(Arrays.asList(seriesName, seriesName, "工序分类"));
+        headTitles.add(Arrays.asList(seriesName, seriesName, "指标类别"));
+        headTitles.add(Arrays.asList(seriesName, seriesName, "指标"));
+        headTitles.add(Arrays.asList(seriesName, seriesName, "单位"));
+        headTitles.add(Arrays.asList(seriesName, seriesName, "指标等级"));
+        headTitles.add(Arrays.asList(seriesName, seriesName, "标杆值"));
+        headTitles.add(Arrays.asList(seriesName, seriesName, "完成值"));
+        headTitles.add(Arrays.asList(seriesName, seriesName, "标准差"));
+        headTitles.add(Arrays.asList(seriesName, seriesName, "权重"));
+        headTitles.add(Arrays.asList(seriesName, seriesName, "单项指标能力指数"));
+        headTitles.add(Arrays.asList(seriesName, seriesName, "工序综合能力指数"));
+        headTitles.add(Arrays.asList(seriesName, seriesName, "系列综合能力指数"));
+        return headTitles;
     }
 }
 

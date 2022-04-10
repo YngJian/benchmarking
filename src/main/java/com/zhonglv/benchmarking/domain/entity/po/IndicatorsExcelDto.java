@@ -32,20 +32,21 @@ public class IndicatorsExcelDto {
      * 工序分类
      */
     @ExcelProperty("工序分类")
-    @ColumnWidth(value = 25)
+    @ColumnWidth(value = 30)
     private String workingProcedureClassification;
 
     /**
      * 指标类别
      */
     @ExcelProperty("指标类别")
-    @ColumnWidth(value = 40)
+    @ColumnWidth(value = 30)
     private String categoryOfIndicators;
 
     /**
      * 指标
      */
     @ExcelProperty("指标")
+    @ColumnWidth(value = 30)
     private String indicatorsName;
 
     /**

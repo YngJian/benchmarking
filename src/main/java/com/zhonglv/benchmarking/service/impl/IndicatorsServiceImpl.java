@@ -22,6 +22,8 @@ import com.zhonglv.benchmarking.domain.entity.po.IndicatorsPo;
 import com.zhonglv.benchmarking.domain.mapper.IndicatorsMapper;
 import com.zhonglv.benchmarking.domain.mapper.SeriesInfoMapper;
 import com.zhonglv.benchmarking.service.IndicatorsService;
+import com.zhonglv.benchmarking.utils.ExcelFillCellMergeStrategy;
+import com.zhonglv.benchmarking.utils.ExcelFillRowMergeStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
@@ -281,30 +283,11 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
         List<IndicatorsDto> indicatorsDtoList = indicatorsMap.get(seriesName);
 
         List<IndicatorsExcelDto> indicatorsExcelDtos = new ArrayList<>(indicatorsDtoList.size());
-        indicatorsDtoList.stream().sorted(Comparator.comparing(Indicators::getINumber)).forEachOrdered(indicatorsDto -> {
+        indicatorsDtoList.forEach(indicatorsDto -> {
             IndicatorsExcelDto indicatorsExcelDto = new IndicatorsExcelDto();
             BeanUtils.copyProperties(indicatorsDto, indicatorsExcelDto);
             indicatorsExcelDtos.add(indicatorsExcelDto);
         });
-
-        Map<String, Long> workMap = indicatorsExcelDtos.stream()
-                .collect(Collectors.groupingBy(IndicatorsExcelDto::getWorkingProcedureClassification, Collectors.counting()));
-        LinkedList<Long> longs = new LinkedList<>(workMap.values());
-        List<OnceAbsoluteMergeStrategy> mergeStrategies = new LinkedList<>();
-        int sum = 2;
-        for (int i = 0; i < longs.size(); i++) {
-            OnceAbsoluteMergeStrategy onceAbsoluteMergeStrategy;
-            if (i == 0) {
-                onceAbsoluteMergeStrategy = new OnceAbsoluteMergeStrategy(2, Math.toIntExact(longs.get(i)), 1, 1);
-            } else {
-                onceAbsoluteMergeStrategy = new OnceAbsoluteMergeStrategy(sum + 1, sum + Math.toIntExact(longs.get(i)), 1, 1);
-            }
-            sum += Math.toIntExact(longs.get(i));
-            mergeStrategies.add(onceAbsoluteMergeStrategy);
-        }
-
-        Map<String, Long> categoryMap = indicatorsExcelDtos.stream()
-                .collect(Collectors.groupingBy(IndicatorsExcelDto::getCategoryOfIndicators, Collectors.counting()));
 
         // 这里注意 有同学反应使用swagger 会导致各种问题，请直接用浏览器或者用postman
         try {
@@ -315,7 +298,11 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
             response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + System.currentTimeMillis() + ".xlsx");
             // 这里需要设置不关闭流
             ExcelWriterBuilder write = EasyExcel.write(response.getOutputStream(), IndicatorsExcelDto.class);
-            mergeStrategies.forEach(write::registerWriteHandler);
+            int[] integers = {12};
+            write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 1));
+            write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 2));
+            write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 11));
+            write.registerWriteHandler(new ExcelFillCellMergeStrategy(3, integers));
             write.head(head(seriesName)).autoCloseStream(Boolean.FALSE).sheet(seriesName).doWrite(indicatorsExcelDtos);
         } catch (Exception e) {
             // 重置response

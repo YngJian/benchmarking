@@ -2,8 +2,11 @@ package com.zhonglv.benchmarking.handler.excel;
 
 import com.zhonglv.benchmarking.domain.entity.dto.IndicatorsDto;
 import com.zhonglv.benchmarking.domain.entity.po.ExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.LowExcelPo;
 import com.zhonglv.benchmarking.domain.entity.po.MediumExcelPo;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -22,13 +25,24 @@ public class MediumExcelDefaultDataHandler extends MediumExcelDataHandler {
      */
     @Override
     public void assemblySuperExcel(Map<String, Map<String, List<IndicatorsDto>>> indicesMap, List<ExcelPo> excelPoList) {
+        Map<String, MediumExcelPo> mediumExcelPoMap = new HashMap<>();
         for (Map<String, List<IndicatorsDto>> value : indicesMap.values()) {
             for (Map.Entry<String, List<IndicatorsDto>> stringListEntry : value.entrySet()) {
-                MediumExcelPo mediumExcelPo = new MediumExcelPo();
-                stringListEntry.getValue().forEach(indicatorsDto -> {
-                    assemblyData(stringListEntry.getKey(), mediumExcelPo, indicatorsDto);
-                });
-                excelPoList.add(mediumExcelPo);
+                for (int i = 0; i < stringListEntry.getValue().size(); i++) {
+                    MediumExcelPo mediumExcelPo = new MediumExcelPo();
+                    IndicatorsDto indicatorsDto = stringListEntry.getValue().get(i);
+                    String iNumber = indicatorsDto.getINumber();
+                    if (!mediumExcelPoMap.containsKey(iNumber)) {
+                        assemblyData(stringListEntry.getKey(), mediumExcelPo, indicatorsDto);
+                        mediumExcelPoMap.put(iNumber, mediumExcelPo);
+                    }else {
+                        mediumExcelPo = mediumExcelPoMap.get(iNumber);
+                        assemblyData(stringListEntry.getKey(), mediumExcelPo, indicatorsDto);
+                    }
+                    if (StringUtils.isNotBlank(mediumExcelPo.getNumber())) {
+                        excelPoList.add(mediumExcelPo);
+                    }
+                }
             }
         }
     }

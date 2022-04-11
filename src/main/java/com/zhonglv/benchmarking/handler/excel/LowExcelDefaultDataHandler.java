@@ -3,7 +3,9 @@ package com.zhonglv.benchmarking.handler.excel;
 import com.zhonglv.benchmarking.domain.entity.dto.IndicatorsDto;
 import com.zhonglv.benchmarking.domain.entity.po.ExcelPo;
 import com.zhonglv.benchmarking.domain.entity.po.LowExcelPo;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -22,13 +24,24 @@ public class LowExcelDefaultDataHandler extends LowExcelDataHandler {
      */
     @Override
     public void assemblySuperExcel(Map<String, Map<String, List<IndicatorsDto>>> indicesMap, List<ExcelPo> excelPoList) {
+        Map<String, LowExcelPo> lowExcelPoMap = new HashMap<>();
         for (Map<String, List<IndicatorsDto>> value : indicesMap.values()) {
             for (Map.Entry<String, List<IndicatorsDto>> stringListEntry : value.entrySet()) {
-                LowExcelPo lowExcelPo = new LowExcelPo();
-                stringListEntry.getValue().forEach(indicatorsDto -> {
-                    assemblyData(stringListEntry.getKey(), lowExcelPo, indicatorsDto);
-                });
-                excelPoList.add(lowExcelPo);
+                for (int i = 0; i < stringListEntry.getValue().size(); i++) {
+                    LowExcelPo lowExcelPo = new LowExcelPo();
+                    IndicatorsDto indicatorsDto = stringListEntry.getValue().get(i);
+                    String iNumber = indicatorsDto.getINumber();
+                    if (!lowExcelPoMap.containsKey(iNumber)) {
+                        assemblyData(stringListEntry.getKey(), lowExcelPo, indicatorsDto);
+                        lowExcelPoMap.put(iNumber, lowExcelPo);
+                    }else {
+                        lowExcelPo = lowExcelPoMap.get(iNumber);
+                        assemblyData(stringListEntry.getKey(), lowExcelPo, indicatorsDto);
+                    }
+                    if (StringUtils.isNotBlank(lowExcelPo.getNumber())) {
+                        excelPoList.add(lowExcelPo);
+                    }
+                }
             }
         }
     }

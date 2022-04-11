@@ -90,7 +90,7 @@ public class IndicatorsController {
      * @since 2.1.1
      */
 
-    @ApiOperation("下载权限内系列数据")
+    @ApiOperation("导出权限内系列数据")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "token", value = "token", dataType = "String", dataTypeClass = String.class, paramType = "Header"),
             @ApiImplicitParam(name = "seriesName", value = "系类名称名称", dataType = "String", dataTypeClass = String.class, paramType = "query"),
@@ -102,7 +102,7 @@ public class IndicatorsController {
                          @RequestParam(value = "seriesName") String seriesName,
                          @RequestParam(required = false) String startTime,
                          @RequestParam(required = false) String endTime,
-                         HttpServletResponse response) throws IOException {
+                         HttpServletResponse response) {
         if (!DateUtils.correctDateParam(DATE_PATTEN, startTime, endTime)) {
             log.info("Invalid time parameter.startProTime:{},endProTime:{}", startTime, endTime);
             Result<IndicatorsPo> result = new Result<IndicatorsPo>().toInvalidParam("Invalid time parameter.");
@@ -123,7 +123,7 @@ public class IndicatorsController {
      * @since 2.1.1
      */
 
-    @ApiOperation("下载权限内系列数据")
+    @ApiOperation("根据系列类型导出")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "token", value = "token", dataType = "String", dataTypeClass = String.class, paramType = "Header"),
             @ApiImplicitParam(name = "seriesType", value = "系类类型", allowableValues = "1,2,3", dataType = "String", dataTypeClass = String.class, paramType = "query"),

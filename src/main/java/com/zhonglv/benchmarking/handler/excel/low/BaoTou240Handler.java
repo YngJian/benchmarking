@@ -4,6 +4,8 @@ import com.zhonglv.benchmarking.domain.entity.dto.IndicatorsDto;
 import com.zhonglv.benchmarking.domain.entity.po.ExcelPo;
 import com.zhonglv.benchmarking.domain.entity.po.LowExcelPo;
 import com.zhonglv.benchmarking.handler.excel.LowExcelDataHandler;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 
 /**
  * @description:
@@ -19,6 +21,10 @@ public class BaoTou240Handler extends LowExcelDataHandler {
      */
     @Override
     public ExcelPo dataProcessing(LowExcelPo lowExcelPo, IndicatorsDto indicatorsDto) {
+        if (StringUtils.isBlank(lowExcelPo.getNumber())) {
+            BeanUtils.copyProperties(indicatorsDto, lowExcelPo);
+            lowExcelPo.setNumber(indicatorsDto.getINumber());
+        }
         lowExcelPo.setBaoTou240CompletionValue(indicatorsDto.getCompletionValue())
                 .setBaoTou240SingleIndexCapabilityIndex(indicatorsDto.getSingleIndexCapabilityIndex())
                 .setBaoTou240SeriesComprehensiveCapabilityIndex(indicatorsDto.getSeriesComprehensiveCapabilityIndex())

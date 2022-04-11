@@ -4,6 +4,8 @@ import com.zhonglv.benchmarking.domain.entity.dto.IndicatorsDto;
 import com.zhonglv.benchmarking.domain.entity.po.ExcelPo;
 import com.zhonglv.benchmarking.domain.entity.po.SuperExcelPo;
 import com.zhonglv.benchmarking.handler.excel.SuperExcelDataHandler;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 
 /**
  * @description:
@@ -19,6 +21,10 @@ public class LianCheng500Handler extends SuperExcelDataHandler {
      */
     @Override
     public ExcelPo dataProcessing(SuperExcelPo superExcelDto, IndicatorsDto indicatorsDto) {
+        if (StringUtils.isBlank(superExcelDto.getNumber())) {
+            BeanUtils.copyProperties(indicatorsDto, superExcelDto);
+            superExcelDto.setNumber(indicatorsDto.getINumber());
+        }
         superExcelDto.setLianCheng500CompletionValue(indicatorsDto.getCompletionValue())
                 .setLianCheng500SingleIndexCapabilityIndex(indicatorsDto.getSingleIndexCapabilityIndex())
                 .setLianCheng500SeriesComprehensiveCapabilityIndex(indicatorsDto.getSeriesComprehensiveCapabilityIndex())

@@ -2,8 +2,11 @@ package com.zhonglv.benchmarking.handler.excel;
 
 import com.zhonglv.benchmarking.domain.entity.dto.IndicatorsDto;
 import com.zhonglv.benchmarking.domain.entity.po.ExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.MediumExcelPo;
 import com.zhonglv.benchmarking.domain.entity.po.SuperExcelPo;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -22,13 +25,24 @@ public class SuperExcelDefaultDataHandler extends SuperExcelDataHandler {
      */
     @Override
     public void assemblySuperExcel(Map<String, Map<String, List<IndicatorsDto>>> indicesMap, List<ExcelPo> excelPoList) {
+        Map<String, SuperExcelPo> superExcelPoMap = new HashMap<>();
         for (Map<String, List<IndicatorsDto>> value : indicesMap.values()) {
             for (Map.Entry<String, List<IndicatorsDto>> stringListEntry : value.entrySet()) {
-                SuperExcelPo superExcelPo = new SuperExcelPo();
-                stringListEntry.getValue().forEach(indicatorsDto -> {
-                    assemblyData(stringListEntry.getKey(), superExcelPo, indicatorsDto);
-                });
-                excelPoList.add(superExcelPo);
+                for (int i = 0; i < stringListEntry.getValue().size(); i++) {
+                    SuperExcelPo superExcelPo = new SuperExcelPo();
+                    IndicatorsDto indicatorsDto = stringListEntry.getValue().get(i);
+                    String iNumber = indicatorsDto.getINumber();
+                    if (!superExcelPoMap.containsKey(iNumber)) {
+                        assemblyData(stringListEntry.getKey(), superExcelPo, indicatorsDto);
+                        superExcelPoMap.put(iNumber, superExcelPo);
+                    }else {
+                        superExcelPo = superExcelPoMap.get(iNumber);
+                        assemblyData(stringListEntry.getKey(), superExcelPo, indicatorsDto);
+                    }
+                    if (StringUtils.isNotBlank(superExcelPo.getNumber())) {
+                        excelPoList.add(superExcelPo);
+                    }
+                }
             }
         }
     }

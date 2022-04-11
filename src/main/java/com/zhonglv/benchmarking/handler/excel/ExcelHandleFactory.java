@@ -3,12 +3,10 @@ package com.zhonglv.benchmarking.handler.excel;
 import com.zhonglv.benchmarking.common.CompanyEnum;
 import com.zhonglv.benchmarking.common.ConstantType;
 import com.zhonglv.benchmarking.handler.excel.low.*;
-import com.zhonglv.benchmarking.handler.excel.medium.BaoTou400Handler;
-import com.zhonglv.benchmarking.handler.excel.medium.HuaYun390Handler;
-import com.zhonglv.benchmarking.handler.excel.medium.LanZhou375Handler;
-import com.zhonglv.benchmarking.handler.excel.medium.ShanXiYi300Handler;
+import com.zhonglv.benchmarking.handler.excel.medium.*;
 import com.zhonglv.benchmarking.handler.excel.supers.HuaYun500Handler;
 import com.zhonglv.benchmarking.handler.excel.supers.LianCheng500Handler;
+import com.zhonglv.benchmarking.handler.excel.supers.ShanXi500Handler;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -30,10 +28,13 @@ public class ExcelHandleFactory {
     static {
         HANDLER_MAPS.put(CompanyEnum.HUA_YUN_500.getName(), HuaYun500Handler.class);
         HANDLER_MAPS.put(CompanyEnum.LIAN_CHENG_500.getName(), LianCheng500Handler.class);
+        HANDLER_MAPS.put(CompanyEnum.SHANG_XI_ZHONG_RUN_500.getName(), ShanXi500Handler.class);
         HANDLER_MAPS.put(CompanyEnum.BAO_TOU_400.getName(), BaoTou400Handler.class);
+        HANDLER_MAPS.put(CompanyEnum.SHAN_XI_ER_300.getName(), ShanXiEr300Handler.class);
         HANDLER_MAPS.put(CompanyEnum.HUA_YUN_390.getName(), HuaYun390Handler.class);
         HANDLER_MAPS.put(CompanyEnum.LAN_ZHOU_375.getName(), LanZhou375Handler.class);
         HANDLER_MAPS.put(CompanyEnum.SHAN_XI_YI_300.getName(), ShanXiYi300Handler.class);
+        HANDLER_MAPS.put(CompanyEnum.LIAN_CHENG_200.getName(), LianCheng200Handler.class);
         HANDLER_MAPS.put(CompanyEnum.BAO_TOU_200.getName(), BaoTou200Handler.class);
         HANDLER_MAPS.put(CompanyEnum.BAO_TOU_240.getName(), BaoTou240Handler.class);
         HANDLER_MAPS.put(CompanyEnum.LAN_ZHOU_200.getName(), LanZhou200Handler.class);

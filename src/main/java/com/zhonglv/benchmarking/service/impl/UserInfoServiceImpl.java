@@ -1,4 +1,4 @@
-package com.zhonglv.benchmarking.service;
+package com.zhonglv.benchmarking.service.impl;
 
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -11,7 +11,7 @@ import com.zhonglv.benchmarking.domain.entity.dto.UserDto;
 import com.zhonglv.benchmarking.domain.entity.dto.UserInfoDto;
 import com.zhonglv.benchmarking.domain.mapper.SeriesInfoMapper;
 import com.zhonglv.benchmarking.domain.mapper.UserInfoMapper;
-import com.zhonglv.benchmarking.service.impl.UserInfoService;
+import com.zhonglv.benchmarking.service.UserInfoService;
 import com.zhonglv.benchmarking.utils.JwtUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;

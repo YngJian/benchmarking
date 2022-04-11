@@ -1,4 +1,4 @@
-package com.zhonglv.benchmarking.service.impl;
+package com.zhonglv.benchmarking.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.zhonglv.benchmarking.domain.entity.SeriesInfo;

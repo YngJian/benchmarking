@@ -1,9 +1,6 @@
 package com.zhonglv.benchmarking.utils;
 
 
-import com.alibaba.excel.metadata.Head;
-import com.alibaba.excel.metadata.data.WriteCellData;
-import com.alibaba.excel.write.handler.CellWriteHandler;
 import com.alibaba.excel.write.handler.RowWriteHandler;
 import com.alibaba.excel.write.metadata.holder.WriteSheetHolder;
 import com.alibaba.excel.write.metadata.holder.WriteTableHolder;
@@ -52,10 +49,10 @@ public class ExcelFillRowMergeStrategy implements RowWriteHandler {
         Cell preFirstCell = preRow.getCell(1);
         Object preFirstData = preFirstCell.getCellType() == CellType.STRING ? preFirstCell.getStringCellValue() : preFirstCell.getNumericCellValue();
 
-        // 当前行的第一个Cell
+        // 当前行的当前列Cell
         Cell curFirstCell1 = curRow.getCell(mergeColumnRegion);
         Object curFirstData1 = curFirstCell1.getCellType() == CellType.STRING ? curFirstCell1.getStringCellValue() : curFirstCell1.getNumericCellValue();
-        // 上一行的第一个Cell
+        // 上一行的当前列Cell
         Cell preFirstCell1 = preRow.getCell(mergeColumnRegion);
         Object preFirstData1 = preFirstCell1.getCellType() == CellType.STRING ? preFirstCell1.getStringCellValue() : preFirstCell1.getNumericCellValue();
 

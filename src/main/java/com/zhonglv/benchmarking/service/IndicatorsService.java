@@ -6,7 +6,6 @@ import com.zhonglv.benchmarking.domain.entity.Indicators;
 import com.zhonglv.benchmarking.domain.entity.po.IndicatorsPo;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 public interface IndicatorsService extends IService<Indicators> {
 
@@ -43,6 +42,19 @@ public interface IndicatorsService extends IService<Indicators> {
      * @param endTime    endTime
      * @param response   response
      */
-    void download(String token, String seriesName, String startTime, String endTime, HttpServletResponse response) throws IOException;
+    void download(String token, String seriesName, String startTime, String endTime,
+                  HttpServletResponse response);
+
+    /**
+     * download
+     *
+     * @param token      token
+     * @param seriesType seriesType
+     * @param startTime  startTime
+     * @param endTime    endTime
+     * @param response   response
+     */
+    void downloadBySeriesType(String token, String seriesType, String startTime, String endTime,
+                              HttpServletResponse response);
 }
 

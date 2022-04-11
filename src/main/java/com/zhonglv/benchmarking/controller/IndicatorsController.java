@@ -84,7 +84,6 @@ public class IndicatorsController {
         return indicatorsService.getIndicatorsByType(token, indicatorsNames, seriesType, startTime, endTime);
     }
 
-
     /**
      * 文件下载并且失败的时候返回json（默认失败了会返回一个有部分数据的Excel）
      *
@@ -106,10 +105,9 @@ public class IndicatorsController {
                          HttpServletResponse response) throws IOException {
         if (!DateUtils.correctDateParam(DATE_PATTEN, startTime, endTime)) {
             log.info("Invalid time parameter.startProTime:{},endProTime:{}", startTime, endTime);
-            response.setContentType("application/json");
-            response.setCharacterEncoding("utf-8");
             Result<IndicatorsPo> result = new Result<IndicatorsPo>().toInvalidParam("Invalid time parameter.");
-            response.getOutputStream().println(JSON.toJSONString(result));
+            Result.responseError(response, JSON.toJSONString(result));
+            return;
         }
         if (StringUtils.isBlank(startTime) && StringUtils.isBlank(endTime)) {
             String defaultTime = DateUtils.getIntervalMonthTime(LocalDate.now(), DATE_PATTEN, 1);
@@ -117,5 +115,38 @@ public class IndicatorsController {
             endTime = defaultTime;
         }
         indicatorsService.download(token, seriesName, startTime, endTime, response);
+    }
+
+    /**
+     * 文件下载并且失败的时候返回json（默认失败了会返回一个有部分数据的Excel）
+     *
+     * @since 2.1.1
+     */
+
+    @ApiOperation("下载权限内系列数据")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "token", value = "token", dataType = "String", dataTypeClass = String.class, paramType = "Header"),
+            @ApiImplicitParam(name = "seriesType", value = "系类类型", allowableValues = "1,2,3", dataType = "String", dataTypeClass = String.class, paramType = "query"),
+            @ApiImplicitParam(name = "startTime", value = "开始生产时间 格式yyyy-MM", dataType = "String", dataTypeClass = String.class, paramType = "query"),
+            @ApiImplicitParam(name = "endTime", value = "结束生产时间 格式yyyy-MM", dataType = "String", dataTypeClass = String.class, paramType = "query")
+    })
+    @GetMapping("download/type")
+    public void downloadBySeriesType(@RequestHeader @NotBlank(message = "token 不能为空") String token,
+                                     @RequestParam(value = "seriesType") String seriesType,
+                                     @RequestParam(required = false) String startTime,
+                                     @RequestParam(required = false) String endTime,
+                                     HttpServletResponse response) throws IOException {
+        if (!DateUtils.correctDateParam(DATE_PATTEN, startTime, endTime)) {
+            log.info("Invalid time parameter.startProTime:{},endProTime:{}", startTime, endTime);
+            Result<IndicatorsPo> result = new Result<IndicatorsPo>().toInvalidParam("Invalid time parameter.");
+            Result.responseError(response, JSON.toJSONString(result));
+            return;
+        }
+        if (StringUtils.isBlank(startTime) && StringUtils.isBlank(endTime)) {
+            String defaultTime = DateUtils.getIntervalMonthTime(LocalDate.now(), DATE_PATTEN, 1);
+            startTime = defaultTime;
+            endTime = defaultTime;
+        }
+        indicatorsService.downloadBySeriesType(token, seriesType, startTime, endTime, response);
     }
 }

@@ -4,7 +4,6 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.write.builder.ExcelWriterBuilder;
-import com.alibaba.excel.write.merge.OnceAbsoluteMergeStrategy;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -17,10 +16,13 @@ import com.zhonglv.benchmarking.domain.entity.SeriesInfo;
 import com.zhonglv.benchmarking.domain.entity.dto.IndicatorsDto;
 import com.zhonglv.benchmarking.domain.entity.dto.UserInfoDto;
 import com.zhonglv.benchmarking.domain.entity.po.ComprehensiveIndex;
-import com.zhonglv.benchmarking.domain.entity.po.IndicatorsExcelDto;
+import com.zhonglv.benchmarking.domain.entity.po.ExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.IndicatorsExcelPo;
 import com.zhonglv.benchmarking.domain.entity.po.IndicatorsPo;
 import com.zhonglv.benchmarking.domain.mapper.IndicatorsMapper;
 import com.zhonglv.benchmarking.domain.mapper.SeriesInfoMapper;
+import com.zhonglv.benchmarking.handler.excel.ExcelDataHandler;
+import com.zhonglv.benchmarking.handler.excel.ExcelHandleFactory;
 import com.zhonglv.benchmarking.service.IndicatorsService;
 import com.zhonglv.benchmarking.utils.ExcelFillCellMergeStrategy;
 import com.zhonglv.benchmarking.utils.ExcelFillRowMergeStrategy;
@@ -33,10 +35,10 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -272,20 +274,22 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
      * @param response   response
      */
     @Override
-    public void download(String token, String seriesName, String startTime, String endTime, HttpServletResponse response) throws IOException {
+    public void download(String token, String seriesName, String startTime, String endTime, HttpServletResponse response) {
         Result<IndicatorsPo> indicators = getIndicators(token, seriesName, null, startTime, endTime);
         if (!CommonResult.SUCCESS.getCode().equals(indicators.getCode())) {
-            response.setContentType("application/json");
-            response.setCharacterEncoding("utf-8");
-            response.getOutputStream().println(JSON.toJSONString(indicators));
+            Result.responseError(response, JSON.toJSONString(indicators));
+            return;
         }
         Map<String, List<IndicatorsDto>> indicatorsMap = indicators.getData().getIndicatorsMap();
         List<IndicatorsDto> indicatorsDtoList = indicatorsMap.get(seriesName);
 
-        List<IndicatorsExcelDto> indicatorsExcelDtos = new ArrayList<>(indicatorsDtoList.size());
+        AtomicReference<String> name = new AtomicReference<>();
+        List<IndicatorsExcelPo> indicatorsExcelDtos = new ArrayList<>(indicatorsDtoList.size());
         indicatorsDtoList.forEach(indicatorsDto -> {
-            IndicatorsExcelDto indicatorsExcelDto = new IndicatorsExcelDto();
+            name.set(indicatorsDto.getBenchmarkingEnterprise());
+            IndicatorsExcelPo indicatorsExcelDto = new IndicatorsExcelPo();
             BeanUtils.copyProperties(indicatorsDto, indicatorsExcelDto);
+            indicatorsExcelDto.setNumber(indicatorsDto.getINumber());
             indicatorsExcelDtos.add(indicatorsExcelDto);
         });
 
@@ -297,33 +301,30 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
             String fileName = URLEncoder.encode(seriesName, "UTF-8").replaceAll("\\+", "%20");
             response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + System.currentTimeMillis() + ".xlsx");
             // 这里需要设置不关闭流
-            ExcelWriterBuilder write = EasyExcel.write(response.getOutputStream(), IndicatorsExcelDto.class);
+            ExcelWriterBuilder write = EasyExcel.write(response.getOutputStream(), IndicatorsExcelPo.class);
             int[] integers = {12};
             write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 1));
             write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 2));
             write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 11));
             write.registerWriteHandler(new ExcelFillCellMergeStrategy(3, integers));
-            write.head(head(seriesName)).autoCloseStream(Boolean.FALSE).sheet(seriesName).doWrite(indicatorsExcelDtos);
+            write.head(head(seriesName, name)).autoCloseStream(Boolean.FALSE).sheet(seriesName).doWrite(indicatorsExcelDtos);
         } catch (Exception e) {
             // 重置response
             response.reset();
-            response.setContentType("application/json");
-            response.setCharacterEncoding("utf-8");
             Result<IndicatorsPo> result = new Result<IndicatorsPo>().toFailed("Download file failed " + e.getMessage());
-            response.getOutputStream().println(JSON.toJSONString(result));
+            Result.responseError(response, JSON.toJSONString(result));
         }
     }
 
-    private static List<List<String>> head(String seriesName) {
+    private static List<List<String>> head(String seriesName, AtomicReference<String> name) {
         List<List<String>> headTitles = Lists.newArrayList();
-
         headTitles.add(Arrays.asList(seriesName, seriesName, "序号"));
         headTitles.add(Arrays.asList(seriesName, seriesName, "工序分类"));
         headTitles.add(Arrays.asList(seriesName, seriesName, "指标类别"));
         headTitles.add(Arrays.asList(seriesName, seriesName, "指标"));
         headTitles.add(Arrays.asList(seriesName, seriesName, "单位"));
         headTitles.add(Arrays.asList(seriesName, seriesName, "指标等级"));
-        headTitles.add(Arrays.asList(seriesName, seriesName, "标杆值"));
+        headTitles.add(Arrays.asList(seriesName, seriesName, name.get() + "(标杆值)"));
         headTitles.add(Arrays.asList(seriesName, seriesName, "完成值"));
         headTitles.add(Arrays.asList(seriesName, seriesName, "标准差"));
         headTitles.add(Arrays.asList(seriesName, seriesName, "权重"));
@@ -332,5 +333,36 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
         headTitles.add(Arrays.asList(seriesName, seriesName, "系列综合能力指数"));
         return headTitles;
     }
+
+    /**
+     * download
+     *
+     * @param token      token
+     * @param seriesType seriesType
+     * @param startTime  startTime
+     * @param endTime    endTime
+     * @param response   response
+     */
+    @Override
+    public void downloadBySeriesType(String token, String seriesType, String startTime, String endTime, HttpServletResponse response) {
+        Result<IndicatorsPo> indicators = getIndicatorsByType(token, null, seriesType, startTime, endTime);
+        if (!CommonResult.SUCCESS.getCode().equals(indicators.getCode())) {
+            log.info(indicators.getMsg());
+            Result.responseError(response, JSON.toJSONString(indicators));
+            return;
+        }
+        Map<String, Map<String, List<IndicatorsDto>>> indicesMap = indicators.getData().getIndicesMap();
+        List<ExcelPo> excelPoList = new ArrayList<>();
+        Optional<ExcelDataHandler> assemblyHandle = ExcelHandleFactory.getAssemblyHandle(seriesType);
+        if (!assemblyHandle.isPresent()) {
+            log.info("Invalid coefficient type:{}!", seriesType);
+            Result<Object> result = new Result<>().toInvalidParam("Invalid coefficient type!");
+            Result.responseError(response, JSON.toJSONString(result));
+            return;
+        }
+        assemblyHandle.get().assemblySuperExcel(indicesMap, excelPoList);
+        System.out.println(excelPoList);
+    }
+
 }
 

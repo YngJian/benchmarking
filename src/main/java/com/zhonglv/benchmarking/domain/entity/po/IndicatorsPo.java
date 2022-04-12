@@ -34,4 +34,7 @@ public class IndicatorsPo {
 
     @ApiModelProperty(value = "按月按指标时间的标准数据")
     private Map<String, Map<String, List<IndicatorsDto>>> standardIndicesMap;
+
+    @ApiModelProperty(value = "excel的合并数据")
+    private List<ExcelPo> excelPoList;
 }

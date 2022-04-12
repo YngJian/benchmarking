@@ -36,4 +36,4 @@ logging:
   config: classpath:logback-spring.xml
 
 auth:
-  no-token-path: /login;/logout;/swagger-ui.html;/swagger-resources;/v2/api-docs;/configuration/security;/configuration/ui;/doc.html;/webjars/**;/favicon.ico;/v3/**
+  no-token-path: /login;/logout;/swagger-ui.html;/swagger-resources;/v2/api-docs;/configuration/security;/configuration/ui;/doc.html;/webjars/**;/favicon.ico;/v3/**;/v3/api-docs

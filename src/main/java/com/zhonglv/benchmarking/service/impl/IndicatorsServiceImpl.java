@@ -261,7 +261,17 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
                             return indicatorsDto;
                         }, Collectors.toList()))));
 
-        return new Result<IndicatorsPo>().toSuccess(new IndicatorsPo().setIndicesMap(stringMapMap));
+        List<ExcelPo> excelPoList = new ArrayList<>();
+        if (StringUtils.isNotBlank(seriesType)) {
+            Optional<ExcelDataHandler> assemblyHandle = ExcelHandleFactory.getAssemblyHandle(seriesType);
+            assemblyHandle.ifPresent(excelDataHandler ->
+                    assemblyHandle.get().assemblySuperExcel(stringMapMap, excelPoList));
+        }
+
+        return new Result<IndicatorsPo>().toSuccess(
+                new IndicatorsPo()
+                        .setIndicesMap(stringMapMap)
+                        .setExcelPoList(excelPoList));
     }
 
     /**
@@ -351,17 +361,8 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
             Result.responseError(response, JSON.toJSONString(indicators));
             return;
         }
-        Map<String, Map<String, List<IndicatorsDto>>> indicesMap = indicators.getData().getIndicesMap();
-        List<ExcelPo> excelPoList = new ArrayList<>();
-        Optional<ExcelDataHandler> assemblyHandle = ExcelHandleFactory.getAssemblyHandle(seriesType);
-        if (!assemblyHandle.isPresent()) {
-            log.info("Invalid coefficient type:{}!", seriesType);
-            Result<Object> result = new Result<>().toInvalidParam("Invalid coefficient type!");
-            Result.responseError(response, JSON.toJSONString(result));
-            return;
-        }
-        assemblyHandle.get().assemblySuperExcel(indicesMap, excelPoList);
-        System.out.println(excelPoList);
+        List<ExcelPo> excelPoList = indicators.getData().getExcelPoList();
+
     }
 
 }

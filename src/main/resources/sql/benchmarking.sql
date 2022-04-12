@@ -287,42 +287,87 @@ INSERT INTO `t_user_group` VALUES (5, '240kA及以下指标组组长 青海分�
 INSERT INTO `t_user_group` VALUES (6, '山西中润 山西中润500kA\r\n', '2022-04-01 17:22:19', '2022-04-01 17:22:19');
 INSERT INTO `t_user_group` VALUES (7, '包头铝业（含内蒙古华云）内蒙古华云500kA 内蒙古华云390KA 包头铝业400KA 包头铝业240KA 包头铝业200KA\r\n', '2022-04-01 17:23:00', '2022-04-01 17:23:00');
 INSERT INTO `t_user_group` VALUES (8, '连城分公司 连城分公司500KA 连城分公司200KA', '2022-04-01 17:23:26', '2022-04-01 17:23:26');
-INSERT INTO `t_user_group` VALUES (9, '山西新材料 山西新材料300KA ', '2022-04-01 17:23:51', '2022-04-01 17:23:51');
-INSERT INTO `t_user_group` VALUES (10, '兰州分公司 兰州分公司375KA 兰州分公司200KA', '2022-04-01 17:24:17', '2022-04-01 17:24:17');
-INSERT INTO `t_user_group` VALUES (11, '青海分公司 青海分公司240KA 青海分公司200KA 青海分公司180KA', '2022-04-01 17:24:36', '2022-04-01 17:24:36');
+INSERT INTO `t_user_group`
+VALUES (9, '山西新材料 山西新材料300KA ', '2022-04-01 17:23:51', '2022-04-01 17:23:51');
+INSERT INTO `t_user_group`
+VALUES (10, '兰州分公司 兰州分公司375KA 兰州分公司200KA', '2022-04-01 17:24:17', '2022-04-01 17:24:17');
+INSERT INTO `t_user_group`
+VALUES (11, '青海分公司 青海分公司240KA 青海分公司200KA 青海分公司180KA', '2022-04-01 17:24:36', '2022-04-01 17:24:36');
 COMMIT;
 
 -- ----------------------------
 -- Table structure for t_user_info
 -- ----------------------------
 DROP TABLE IF EXISTS `t_user_info`;
-CREATE TABLE `t_user_info` (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
-  `user_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '用户名',
-  `pwd` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '密码',
-  `group_id` bigint NOT NULL COMMENT '组id（id为1的包含所有数据系列权限）',
-  `is_upload` smallint NOT NULL COMMENT '是否能上传0不能1能',
-  `user_desc` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '描述',
-  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='用户信息表';
+CREATE TABLE `t_user_info`
+(
+    `id`          bigint                                                        NOT NULL AUTO_INCREMENT COMMENT '主键id',
+    `user_name`   varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '用户名',
+    `pwd`         varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '密码',
+    `group_id`    bigint                                                        NOT NULL COMMENT '组id（id为1的包含所有数据系列权限）',
+    `is_upload`   smallint                                                      NOT NULL COMMENT '是否能上传0不能1能',
+    `user_desc`   varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '描述',
+    `create_time` datetime                                                      DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime                                                      DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB
+  AUTO_INCREMENT = 12
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci
+  ROW_FORMAT = DYNAMIC COMMENT ='用户信息表';
 
 -- ----------------------------
 -- Records of t_user_info
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_user_info` VALUES (1, 'zlgf', '123456', 1, 0, '中铝股份', '2022-04-01 17:12:17', '2022-04-01 17:12:17');
-INSERT INTO `t_user_info` VALUES (2, 'qtqy', '123456', 2, 0, '北方电解铝牵头企业', '2022-04-01 17:13:01', '2022-04-01 17:24:55');
-INSERT INTO `t_user_info` VALUES (3, '5zbzc', '123456', 3, 0, '500kA指标组组长', '2022-04-01 17:14:02', '2022-04-01 17:24:56');
-INSERT INTO `t_user_info` VALUES (4, '3zbzc', '123456', 4, 0, '500kA指标组组长', '2022-04-01 17:14:40', '2022-04-01 17:24:57');
-INSERT INTO `t_user_info` VALUES (5, '2zbzc', '123456', 5, 0, '500kA指标组组长', '2022-04-01 17:15:02', '2022-04-01 17:24:58');
-INSERT INTO `t_user_info` VALUES (6, 'sxzr', '123456', 6, 1, '山西中润', '2022-04-01 17:15:38', '2022-04-01 17:24:59');
-INSERT INTO `t_user_info` VALUES (7, 'btly', '123456', 7, 1, '包头铝业（含内蒙古华云）', '2022-04-01 17:16:06', '2022-04-01 17:25:00');
-INSERT INTO `t_user_info` VALUES (8, 'lcfgs', '123456', 8, 1, '连城分公司', '2022-04-01 17:16:27', '2022-04-01 17:25:00');
-INSERT INTO `t_user_info` VALUES (9, 'sxxcl', '123456', 9, 1, '山西新材料', '2022-04-01 17:16:57', '2022-04-01 17:25:01');
-INSERT INTO `t_user_info` VALUES (10, 'lzfgs', '123456', 10, 1, '兰州分公司', '2022-04-01 17:17:23', '2022-04-01 17:25:03');
-INSERT INTO `t_user_info` VALUES (11, 'qhfgs', '123456', 11, 1, '青海分公司', '2022-04-01 17:17:45', '2022-04-01 17:25:05');
+INSERT INTO `t_user_info`
+VALUES (1, 'zlgf', '123456', 1, 0, '中铝股份', '2022-04-01 17:12:17', '2022-04-01 17:12:17');
+INSERT INTO `t_user_info`
+VALUES (2, 'qtqy', '123456', 2, 0, '北方电解铝牵头企业', '2022-04-01 17:13:01', '2022-04-01 17:24:55');
+INSERT INTO `t_user_info`
+VALUES (3, '5zbzc', '123456', 3, 0, '500kA指标组组长', '2022-04-01 17:14:02', '2022-04-01 17:24:56');
+INSERT INTO `t_user_info`
+VALUES (4, '3zbzc', '123456', 4, 0, '500kA指标组组长', '2022-04-01 17:14:40', '2022-04-01 17:24:57');
+INSERT INTO `t_user_info`
+VALUES (5, '2zbzc', '123456', 5, 0, '500kA指标组组长', '2022-04-01 17:15:02', '2022-04-01 17:24:58');
+INSERT INTO `t_user_info`
+VALUES (6, 'sxzr', '123456', 6, 1, '山西中润', '2022-04-01 17:15:38', '2022-04-01 17:24:59');
+INSERT INTO `t_user_info`
+VALUES (7, 'btly', '123456', 7, 1, '包头铝业（含内蒙古华云）', '2022-04-01 17:16:06', '2022-04-01 17:25:00');
+INSERT INTO `t_user_info`
+VALUES (8, 'lcfgs', '123456', 8, 1, '连城分公司', '2022-04-01 17:16:27', '2022-04-01 17:25:00');
+INSERT INTO `t_user_info`
+VALUES (9, 'sxxcl', '123456', 9, 1, '山西新材料', '2022-04-01 17:16:57', '2022-04-01 17:25:01');
+INSERT INTO `t_user_info`
+VALUES (10, 'lzfgs', '123456', 10, 1, '兰州分公司', '2022-04-01 17:17:23', '2022-04-01 17:25:03');
+INSERT INTO `t_user_info`
+VALUES (11, 'qhfgs', '123456', 11, 1, '青海分公司', '2022-04-01 17:17:45', '2022-04-01 17:25:05');
+COMMIT;
+
+BEGIN;
+update indicators
+set Branch_company = '山西新材料电解一系列',
+    Series_name='山西新材料电解一系列300kA'
+where Series_name = '山西新材料300KA';
+
+update t_series_info
+set info          = '山西新材料电解一系列300kA',
+    branch_company='山西新材料电解一系列',
+    series_desc='山西新材料电解一系列300kA'
+where id = 4;
+
+INSERT INTO `t_series_info`
+VALUES (15, '山西新材料电解二系列300kA', '300KA', '山西新材料电解二系列', 2, '山西新材料电解二系列300kA', '2022-04-12 17:09:55',
+        '2022-04-12 17:09:55');
+
+INSERT INTO `t_series_permission`
+VALUES (57, 1, 15, '2022-04-12 17:30:19');
+INSERT INTO `t_series_permission`
+VALUES (58, 2, 15, '2022-04-12 17:30:19');
+INSERT INTO `t_series_permission`
+VALUES (59, 4, 15, '2022-04-12 17:30:19');
+INSERT INTO `t_series_permission`
+VALUES (69, 9, 15, '2022-04-12 17:30:19');
 COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;

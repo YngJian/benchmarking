@@ -13,6 +13,7 @@ import java.util.Map;
 public class CacheMap {
     public final static Map<String, String> MONTH_MAP = new HashMap<>();
     public final static Map<String, String> MODEL_MAP = new HashMap<>();
+    public final static Map<String, String> GRADE_MAP = new HashMap<>();
 
     static {
         MONTH_MAP.put("01", "一月");
@@ -28,9 +29,13 @@ public class CacheMap {
         MONTH_MAP.put("11", "十一月");
         MONTH_MAP.put("12", "十二月");
 
-        MODEL_MAP.put("500kA指标体系","山西中润500kA");
-        MODEL_MAP.put("300-400kA指标体系","山西新材料300kA");
-        MODEL_MAP.put("240kA及以下指标体系","连城分公司200kA");
+        MODEL_MAP.put("500kA指标体系", "山西中润500kA");
+        MODEL_MAP.put("300-400kA指标体系", "山西新材料300kA");
+        MODEL_MAP.put("240kA及以下指标体系", "连城分公司200kA");
+
+        GRADE_MAP.put("1", "500kA指标体系");
+        GRADE_MAP.put("2", "300-400kA指标体系");
+        GRADE_MAP.put("3", "240kA及以下指标体系");
     }
 
 }

@@ -23,15 +23,16 @@ public class MediumExcelPo extends ExcelPo {
     /**
      * 公司年平均水平基准值
      */
-    @ExcelProperty(value = "公司年平均水平基准值", index = 6)
-    @ApiModelProperty(value = "公司年平均水平基准值")
+    @ExcelProperty(value = "2021年公司年平均水平基准值", index = 6)
+    @ColumnWidth(value = 20)
+    @ApiModelProperty(value = "2021年公司年平均水平基准值")
     private String averageReferenceValue;
 
     /**
      * 标杆值
      */
     @ExcelProperty(value = "标杆值", index = 7)
-    @ColumnWidth(value = 23)
+    @ColumnWidth(value = 18)
     @ApiModelProperty(value = "标杆值")
     private String benchmarkValue;
 
@@ -47,6 +48,7 @@ public class MediumExcelPo extends ExcelPo {
      * 单项指标能力指数
      */
     @ExcelProperty(value = "单项指标能力指数", index = 9)
+    @ColumnWidth(value = 12)
     @ApiModelProperty(value = "单项指标能力指数")
     private String baoTou400SingleIndexCapabilityIndex;
 
@@ -54,6 +56,7 @@ public class MediumExcelPo extends ExcelPo {
      * 工序综合能力指数
      */
     @ExcelProperty(value = "工序综合能力指数", index = 10)
+    @ColumnWidth(value = 12)
     @ApiModelProperty(value = "工序综合能力指数")
     private String baoTou400ProcessComprehensiveCapabilityIndex;
 
@@ -61,6 +64,7 @@ public class MediumExcelPo extends ExcelPo {
      * 系列综合能力指数
      */
     @ExcelProperty(value = "系列综合能力指数", index = 11)
+    @ColumnWidth(value = 12)
     @ApiModelProperty(value = "系列综合能力指数")
     private String baoTou400SeriesComprehensiveCapabilityIndex;
 
@@ -76,6 +80,7 @@ public class MediumExcelPo extends ExcelPo {
      * 单项指标能力指数
      */
     @ExcelProperty(value = "单项指标能力指数", index = 13)
+    @ColumnWidth(value = 12)
     @ApiModelProperty(value = "单项指标能力指数")
     private String huaYun390SingleIndexCapabilityIndex;
 
@@ -83,6 +88,7 @@ public class MediumExcelPo extends ExcelPo {
      * 工序综合能力指数
      */
     @ExcelProperty(value = "工序综合能力指数", index = 14)
+    @ColumnWidth(value = 12)
     @ApiModelProperty(value = "工序综合能力指数")
     private String huaYun390ProcessComprehensiveCapabilityIndex;
 
@@ -90,6 +96,7 @@ public class MediumExcelPo extends ExcelPo {
      * 系列综合能力指数
      */
     @ExcelProperty(value = "系列综合能力指数", index = 15)
+    @ColumnWidth(value = 12)
     @ApiModelProperty(value = "系列综合能力指数")
     private String huaYun390SeriesComprehensiveCapabilityIndex;
 
@@ -105,6 +112,7 @@ public class MediumExcelPo extends ExcelPo {
      * 单项指标能力指数
      */
     @ExcelProperty(value = "单项指标能力指数", index = 17)
+    @ColumnWidth(value = 12)
     @ApiModelProperty(value = "单项指标能力指数")
     private String lanZhou375SingleIndexCapabilityIndex;
 
@@ -112,6 +120,7 @@ public class MediumExcelPo extends ExcelPo {
      * 工序综合能力指数
      */
     @ExcelProperty(value = "工序综合能力指数", index = 18)
+    @ColumnWidth(value = 12)
     @ApiModelProperty(value = "工序综合能力指数")
     private String lanZhou375ProcessComprehensiveCapabilityIndex;
 
@@ -119,6 +128,7 @@ public class MediumExcelPo extends ExcelPo {
      * 系列综合能力指数
      */
     @ExcelProperty(value = "系列综合能力指数", index = 19)
+    @ColumnWidth(value = 12)
     @ApiModelProperty(value = "系列综合能力指数")
     private String lanZhou375SeriesComprehensiveCapabilityIndex;
 
@@ -134,6 +144,7 @@ public class MediumExcelPo extends ExcelPo {
      * 单项指标能力指数
      */
     @ExcelProperty(value = "单项指标能力指数", index = 21)
+    @ColumnWidth(value = 12)
     @ApiModelProperty(value = "单项指标能力指数")
     private String shanXiYi300SingleIndexCapabilityIndex;
 
@@ -141,6 +152,7 @@ public class MediumExcelPo extends ExcelPo {
      * 工序综合能力指数
      */
     @ExcelProperty(value = "工序综合能力指数", index = 22)
+    @ColumnWidth(value = 12)
     @ApiModelProperty(value = "工序综合能力指数")
     private String shanXiYi300ProcessComprehensiveCapabilityIndex;
 
@@ -148,6 +160,7 @@ public class MediumExcelPo extends ExcelPo {
      * 系列综合能力指数
      */
     @ExcelProperty(value = "系列综合能力指数", index = 23)
+    @ColumnWidth(value = 12)
     @ApiModelProperty(value = "系列综合能力指数")
     private String shanXiYi300SeriesComprehensiveCapabilityIndex;
 }

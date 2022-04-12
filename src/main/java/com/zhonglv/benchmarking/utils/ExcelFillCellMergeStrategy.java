@@ -8,12 +8,14 @@ import com.alibaba.excel.write.metadata.holder.WriteSheetHolder;
 import com.alibaba.excel.write.metadata.holder.WriteTableHolder;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.util.List;
 
+/**
+ * @author yangj
+ */
 public class ExcelFillCellMergeStrategy implements CellWriteHandler {
 
     private int[] mergeColumnIndex;
@@ -43,7 +45,6 @@ public class ExcelFillCellMergeStrategy implements CellWriteHandler {
             }
         }
     }
-
 
 
     /**

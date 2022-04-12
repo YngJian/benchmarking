@@ -1,9 +1,10 @@
 package com.zhonglv.benchmarking.handler.excel;
 
+import com.alibaba.excel.write.builder.ExcelWriterBuilder;
 import com.zhonglv.benchmarking.domain.entity.dto.IndicatorsDto;
 import com.zhonglv.benchmarking.domain.entity.po.ExcelPo;
-import com.zhonglv.benchmarking.domain.entity.po.LowExcelPo;
 import com.zhonglv.benchmarking.domain.entity.po.MediumExcelPo;
+import com.zhonglv.benchmarking.utils.ExcelFillRowMergeStrategy;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -35,7 +36,7 @@ public class MediumExcelDefaultDataHandler extends MediumExcelDataHandler {
                     if (!mediumExcelPoMap.containsKey(iNumber)) {
                         assemblyData(stringListEntry.getKey(), mediumExcelPo, indicatorsDto);
                         mediumExcelPoMap.put(iNumber, mediumExcelPo);
-                    }else {
+                    } else {
                         mediumExcelPo = mediumExcelPoMap.get(iNumber);
                         assemblyData(stringListEntry.getKey(), mediumExcelPo, indicatorsDto);
                     }
@@ -60,5 +61,19 @@ public class MediumExcelDefaultDataHandler extends MediumExcelDataHandler {
             return;
         }
         excelDataHandler.get().dataProcessing(mediumExcelPo, indicatorsDto);
+    }
+
+    /**
+     * 数据处理
+     *
+     * @param write write
+     */
+    @Override
+    public void writeExcelHandle(ExcelWriterBuilder write) {
+        int[] integers = {11, 15, 19, 23};
+        SuperExcelDefaultDataHandler.registerHandler(write, integers);
+
+        write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 18));
+        write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 22));
     }
 }

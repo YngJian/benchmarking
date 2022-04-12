@@ -24,6 +24,8 @@ import lombok.NoArgsConstructor;
         wrapped = BooleanEnum.TRUE, borderTop = BorderStyleEnum.THIN, borderBottom = BorderStyleEnum.THIN,
         borderLeft = BorderStyleEnum.THIN, borderRight = BorderStyleEnum.THIN)
 @ContentRowHeight(value = 20)
+@HeadRowHeight(value = 35)
+@HeadFontStyle(fontHeightInPoints = 13)
 @ContentFontStyle(fontName = "宋体")
 @ApiModel(value = "系列excel的数据")
 public class ExcelPo {
@@ -70,6 +72,7 @@ public class ExcelPo {
      * 指标等级
      */
     @ExcelProperty(value = "指标等级", index = 5)
+    @ColumnWidth(value = 12)
     @ApiModelProperty(value = "指标等级")
     private String indicatorsGrade;
 }

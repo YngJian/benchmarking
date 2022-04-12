@@ -66,9 +66,9 @@ public enum CompanyEnum {
      */
     QING_HAI_200("青海分公司200kA"),
     /**
-     * 青海分公司18kA
+     * 青海分公司180kA
      */
-    QING_HAI_180("青海分公司18kA");
+    QING_HAI_180("青海分公司180kA");
 
     private final String name;
 

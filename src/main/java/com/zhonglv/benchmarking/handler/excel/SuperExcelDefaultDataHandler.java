@@ -1,9 +1,12 @@
 package com.zhonglv.benchmarking.handler.excel;
 
+import com.alibaba.excel.write.builder.ExcelWriterBuilder;
 import com.zhonglv.benchmarking.domain.entity.dto.IndicatorsDto;
 import com.zhonglv.benchmarking.domain.entity.po.ExcelPo;
-import com.zhonglv.benchmarking.domain.entity.po.MediumExcelPo;
 import com.zhonglv.benchmarking.domain.entity.po.SuperExcelPo;
+import com.zhonglv.benchmarking.utils.ExcelFillCellMergeStrategy;
+import com.zhonglv.benchmarking.utils.ExcelFillRowMergeStrategy;
+import com.zhonglv.benchmarking.utils.ExcelFreezeStrategy;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -35,7 +38,7 @@ public class SuperExcelDefaultDataHandler extends SuperExcelDataHandler {
                     if (!superExcelPoMap.containsKey(iNumber)) {
                         assemblyData(stringListEntry.getKey(), superExcelPo, indicatorsDto);
                         superExcelPoMap.put(iNumber, superExcelPo);
-                    }else {
+                    } else {
                         superExcelPo = superExcelPoMap.get(iNumber);
                         assemblyData(stringListEntry.getKey(), superExcelPo, indicatorsDto);
                     }
@@ -60,5 +63,25 @@ public class SuperExcelDefaultDataHandler extends SuperExcelDataHandler {
             return;
         }
         excelDataHandler.get().dataProcessing(superExcelPo, indicatorsDto);
+    }
+
+    /**
+     * 数据处理
+     *
+     * @param write write
+     */
+    @Override
+    public void writeExcelHandle(ExcelWriterBuilder write) {
+        int[] integers = {11, 15};
+        registerHandler(write, integers);
+    }
+
+    static void registerHandler(ExcelWriterBuilder write, int[] integers) {
+        write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 1));
+        write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 2));
+        write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 10));
+        write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 14));
+        write.registerWriteHandler(new ExcelFreezeStrategy(0, 3, 0, 3));
+        write.registerWriteHandler(new ExcelFillCellMergeStrategy(3, integers));
     }
 }

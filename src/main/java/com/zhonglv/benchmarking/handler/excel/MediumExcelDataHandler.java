@@ -1,5 +1,6 @@
 package com.zhonglv.benchmarking.handler.excel;
 
+import com.alibaba.excel.write.builder.ExcelWriterBuilder;
 import com.zhonglv.benchmarking.domain.entity.dto.IndicatorsDto;
 import com.zhonglv.benchmarking.domain.entity.po.ExcelPo;
 import com.zhonglv.benchmarking.domain.entity.po.MediumExcelPo;
@@ -25,7 +26,6 @@ public abstract class MediumExcelDataHandler implements ExcelDataHandler {
         return mediumExcelPo;
     }
 
-
     /**
      * 数据处理
      *
@@ -37,4 +37,12 @@ public abstract class MediumExcelDataHandler implements ExcelDataHandler {
 
     }
 
+    /**
+     * 数据处理
+     *
+     * @param write write
+     */
+    @Override
+    public void writeExcelHandle(ExcelWriterBuilder write) {
+    }
 }

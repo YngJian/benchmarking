@@ -1,5 +1,6 @@
 package com.zhonglv.benchmarking.handler.excel;
 
+import com.alibaba.excel.write.builder.ExcelWriterBuilder;
 import com.zhonglv.benchmarking.domain.entity.dto.IndicatorsDto;
 import com.zhonglv.benchmarking.domain.entity.po.ExcelPo;
 import com.zhonglv.benchmarking.domain.entity.po.LowExcelPo;
@@ -21,7 +22,9 @@ public abstract class LowExcelDataHandler implements ExcelDataHandler {
      * @return ExcelPo ExcelPo
      */
     @Override
-    public ExcelPo dataProcessing(LowExcelPo lowExcelPo, IndicatorsDto indicatorsDto){return lowExcelPo;}
+    public ExcelPo dataProcessing(LowExcelPo lowExcelPo, IndicatorsDto indicatorsDto) {
+        return lowExcelPo;
+    }
 
     /**
      * 数据处理
@@ -34,4 +37,12 @@ public abstract class LowExcelDataHandler implements ExcelDataHandler {
 
     }
 
+    /**
+     * 数据处理
+     *
+     * @param write write
+     */
+    @Override
+    public void writeExcelHandle(ExcelWriterBuilder write) {
+    }
 }

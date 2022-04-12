@@ -264,8 +264,13 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
         List<ExcelPo> excelPoList = new ArrayList<>();
         if (StringUtils.isNotBlank(seriesType)) {
             Optional<ExcelDataHandler> assemblyHandle = ExcelHandleFactory.getAssemblyHandle(seriesType);
-            assemblyHandle.ifPresent(excelDataHandler ->
-                    assemblyHandle.get().assemblySuperExcel(stringMapMap, excelPoList));
+            if (assemblyHandle.isPresent()) {
+                assemblyHandle.ifPresent(excelDataHandler ->
+                        assemblyHandle.get().assemblySuperExcel(stringMapMap, excelPoList));
+            } else {
+                log.info("This series type does not exist! type:{}", seriesType);
+            }
+
         }
 
         return new Result<IndicatorsPo>().toSuccess(
@@ -362,7 +367,30 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
             return;
         }
         List<ExcelPo> excelPoList = indicators.getData().getExcelPoList();
-
+        // 这里注意 有同学反应使用swagger 会导致各种问题，请直接用浏览器或者用postman
+        try {
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setCharacterEncoding("utf-8");
+            // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
+            String grade = CacheMap.GRADE_MAP.get(seriesType);
+            String fileName = URLEncoder.encode(grade, "UTF-8").replaceAll("\\+", "%20");
+            response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + System.currentTimeMillis() + ".xlsx");
+            // 这里需要设置不关闭流
+            ExcelWriterBuilder write = EasyExcel.write(response.getOutputStream(), CacheMap.EXCEL_WRITE_CLASS_MAP.get(seriesType));
+            Optional<ExcelDataHandler> handle = ExcelHandleFactory.getAssemblyHandle(seriesType);
+            if (!handle.isPresent()) {
+                log.info("This series type does not exist! type:{}", seriesType);
+                throw new RuntimeException("This series type does not exist! ");
+            }
+            handle.get().writeExcelHandle(write);
+            List<List<String>> head = CacheMap.HEAD_MAP.get(seriesType);
+            write.head(head).autoCloseStream(Boolean.FALSE).sheet(grade).doWrite(excelPoList);
+        } catch (Exception e) {
+            // 重置response
+            response.reset();
+            Result<IndicatorsPo> result = new Result<IndicatorsPo>().toFailed("Download file failed " + e.getMessage());
+            Result.responseError(response, JSON.toJSONString(result));
+        }
     }
 
 }

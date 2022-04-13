@@ -16,7 +16,7 @@ import java.util.Date;
 /**
  * 用户组表
  */
-@ApiModel(value = "用户组表")
+@ApiModel(value = "用户组")
 @Data
 @Builder
 @AllArgsConstructor

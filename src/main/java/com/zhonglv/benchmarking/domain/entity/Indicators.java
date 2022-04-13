@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 /**
  * @author Administrator
  */
-@ApiModel(value = "indicators")
+@ApiModel(value = "指标信息")
 @Data
 @Builder
 @AllArgsConstructor

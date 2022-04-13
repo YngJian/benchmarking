@@ -26,6 +26,7 @@ import com.zhonglv.benchmarking.handler.excel.ExcelHandleFactory;
 import com.zhonglv.benchmarking.service.IndicatorsService;
 import com.zhonglv.benchmarking.utils.ExcelFillCellMergeStrategy;
 import com.zhonglv.benchmarking.utils.ExcelFillRowMergeStrategy;
+import com.zhonglv.benchmarking.utils.ExcelFreezeStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
@@ -297,6 +298,11 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
         }
         Map<String, List<IndicatorsDto>> indicatorsMap = indicators.getData().getIndicatorsMap();
         List<IndicatorsDto> indicatorsDtoList = indicatorsMap.get(seriesName);
+        if (CollectionUtil.isEmpty(indicatorsDtoList)) {
+            Result<Object> result = new Result<>().toFailed("Department query data is null");
+            Result.responseError(response, JSON.toJSONString(result));
+            return;
+        }
 
         AtomicReference<String> name = new AtomicReference<>();
         List<IndicatorsExcelPo> indicatorsExcelDtos = new ArrayList<>(indicatorsDtoList.size());
@@ -322,6 +328,7 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
             write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 2));
             write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 11));
             write.registerWriteHandler(new ExcelFillCellMergeStrategy(3, integers));
+            write.registerWriteHandler(new ExcelFreezeStrategy(0, 3, 0, 3));
             write.head(head(seriesName, name)).autoCloseStream(Boolean.FALSE).sheet(seriesName).doWrite(indicatorsExcelDtos);
         } catch (Exception e) {
             // 重置response
@@ -333,19 +340,19 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
 
     private static List<List<String>> head(String seriesName, AtomicReference<String> name) {
         List<List<String>> headTitles = Lists.newArrayList();
-        headTitles.add(Arrays.asList(seriesName, seriesName, "序号"));
-        headTitles.add(Arrays.asList(seriesName, seriesName, "工序分类"));
-        headTitles.add(Arrays.asList(seriesName, seriesName, "指标类别"));
-        headTitles.add(Arrays.asList(seriesName, seriesName, "指标"));
-        headTitles.add(Arrays.asList(seriesName, seriesName, "单位"));
-        headTitles.add(Arrays.asList(seriesName, seriesName, "指标等级"));
-        headTitles.add(Arrays.asList(seriesName, seriesName, name.get() + "(标杆值)"));
-        headTitles.add(Arrays.asList(seriesName, seriesName, "完成值"));
-        headTitles.add(Arrays.asList(seriesName, seriesName, "标准差"));
-        headTitles.add(Arrays.asList(seriesName, seriesName, "权重"));
-        headTitles.add(Arrays.asList(seriesName, seriesName, "单项指标能力指数"));
-        headTitles.add(Arrays.asList(seriesName, seriesName, "工序综合能力指数"));
-        headTitles.add(Arrays.asList(seriesName, seriesName, "系列综合能力指数"));
+        headTitles.add(Arrays.asList(seriesName, seriesName, ConstantType.INDEX_SERIAL_NUMBER));
+        headTitles.add(Arrays.asList(seriesName, seriesName, ConstantType.PROCESS_CLASSIFICATION));
+        headTitles.add(Arrays.asList(seriesName, seriesName, ConstantType.INDICATOR_CATEGORY));
+        headTitles.add(Arrays.asList(seriesName, seriesName, ConstantType.INDEX));
+        headTitles.add(Arrays.asList(seriesName, seriesName, ConstantType.UNIT));
+        headTitles.add(Arrays.asList(seriesName, seriesName, ConstantType.INDEX_LEVEL));
+        headTitles.add(Arrays.asList(seriesName, seriesName, name.get() + "(" + ConstantType.BENCHMARK_VALUE + ")"));
+        headTitles.add(Arrays.asList(seriesName, seriesName, ConstantType.COMPLETION_VALUE));
+        headTitles.add(Arrays.asList(seriesName, seriesName, ConstantType.STANDARD_DEVIATION));
+        headTitles.add(Arrays.asList(seriesName, seriesName, ConstantType.WEIGHTS));
+        headTitles.add(Arrays.asList(seriesName, seriesName, ConstantType.SINGLE_INDEX));
+        headTitles.add(Arrays.asList(seriesName, seriesName, ConstantType.COMPREHENSIVE_INDEX));
+        headTitles.add(Arrays.asList(seriesName, seriesName, ConstantType.SERIES_INDEX));
         return headTitles;
     }
 

@@ -5,9 +5,8 @@ import com.zhonglv.benchmarking.domain.entity.dto.IndicatorsDto;
 import com.zhonglv.benchmarking.domain.entity.po.ExcelPo;
 import com.zhonglv.benchmarking.domain.entity.po.LowExcelPo;
 import com.zhonglv.benchmarking.utils.ExcelFillRowMergeStrategy;
-import org.apache.commons.lang3.StringUtils;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,26 +25,24 @@ public class LowExcelDefaultDataHandler extends LowExcelDataHandler {
      */
     @Override
     public void assemblySuperExcel(Map<String, Map<String, List<IndicatorsDto>>> indicesMap, List<ExcelPo> excelPoList) {
-        Map<String, LowExcelPo> lowExcelPoMap = new HashMap<>();
+        Map<String, LowExcelPo> lowExcelPoMap = new LinkedHashMap<>(128);
         for (Map<String, List<IndicatorsDto>> value : indicesMap.values()) {
             for (Map.Entry<String, List<IndicatorsDto>> stringListEntry : value.entrySet()) {
                 for (int i = 0; i < stringListEntry.getValue().size(); i++) {
-                    LowExcelPo lowExcelPo = new LowExcelPo();
                     IndicatorsDto indicatorsDto = stringListEntry.getValue().get(i);
                     String iNumber = indicatorsDto.getINumber();
-                    if (!lowExcelPoMap.containsKey(iNumber)) {
+                    LowExcelPo lowExcelPo = lowExcelPoMap.get(iNumber);
+                    if (lowExcelPo == null) {
+                        lowExcelPo = new LowExcelPo();
                         assemblyData(stringListEntry.getKey(), lowExcelPo, indicatorsDto);
                         lowExcelPoMap.put(iNumber, lowExcelPo);
                     } else {
-                        lowExcelPo = lowExcelPoMap.get(iNumber);
                         assemblyData(stringListEntry.getKey(), lowExcelPo, indicatorsDto);
-                    }
-                    if (StringUtils.isNotBlank(lowExcelPo.getNumber())) {
-                        excelPoList.add(lowExcelPo);
                     }
                 }
             }
         }
+        excelPoList.addAll(lowExcelPoMap.values());
     }
 
     /**

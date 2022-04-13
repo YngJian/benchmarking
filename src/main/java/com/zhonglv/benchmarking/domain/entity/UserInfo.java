@@ -18,7 +18,7 @@ import java.util.Date;
  *
  * @author yangj
  */
-@ApiModel(value = "用户信息表")
+@ApiModel(value = "用户信息")
 @Data
 @Builder
 @AllArgsConstructor

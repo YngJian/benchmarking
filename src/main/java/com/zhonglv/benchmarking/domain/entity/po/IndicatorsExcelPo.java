@@ -45,18 +45,21 @@ public class IndicatorsExcelPo extends ExcelPo {
     /**
      * 单项指标能力指数
      */
-    @ExcelProperty(value = "单项指标能力指数",index = 10)
+    @ExcelProperty(value = "单项指标能力指数", index = 10)
+    @ColumnWidth(value = 12)
     private String singleIndexCapabilityIndex;
 
     /**
      * 工序综合能力指数
      */
-    @ExcelProperty(value = "工序综合能力指数",index = 11)
+    @ExcelProperty(value = "工序综合能力指数", index = 11)
+    @ColumnWidth(value = 12)
     private String processComprehensiveCapabilityIndex;
 
     /**
      * 系列综合能力指数
      */
-    @ExcelProperty(value = "系列综合能力指数",index = 12)
+    @ExcelProperty(value = "系列综合能力指数", index = 12)
+    @ColumnWidth(value = 12)
     private String seriesComprehensiveCapabilityIndex;
 }

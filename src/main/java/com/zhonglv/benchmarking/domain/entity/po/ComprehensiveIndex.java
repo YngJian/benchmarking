@@ -14,7 +14,7 @@ import lombok.experimental.Accessors;
  * @author : Yang Jian
  * @date : 2022/4/4 16:48
  */
-@ApiModel(value = "系列数据")
+@ApiModel(value = "系列标准差数据")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

@@ -5,9 +5,8 @@ import com.zhonglv.benchmarking.domain.entity.dto.IndicatorsDto;
 import com.zhonglv.benchmarking.domain.entity.po.ExcelPo;
 import com.zhonglv.benchmarking.domain.entity.po.MediumExcelPo;
 import com.zhonglv.benchmarking.utils.ExcelFillRowMergeStrategy;
-import org.apache.commons.lang3.StringUtils;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,26 +25,24 @@ public class MediumExcelDefaultDataHandler extends MediumExcelDataHandler {
      */
     @Override
     public void assemblySuperExcel(Map<String, Map<String, List<IndicatorsDto>>> indicesMap, List<ExcelPo> excelPoList) {
-        Map<String, MediumExcelPo> mediumExcelPoMap = new HashMap<>();
+        Map<String, MediumExcelPo> mediumExcelPoMap = new LinkedHashMap<>(128);
         for (Map<String, List<IndicatorsDto>> value : indicesMap.values()) {
             for (Map.Entry<String, List<IndicatorsDto>> stringListEntry : value.entrySet()) {
                 for (int i = 0; i < stringListEntry.getValue().size(); i++) {
-                    MediumExcelPo mediumExcelPo = new MediumExcelPo();
                     IndicatorsDto indicatorsDto = stringListEntry.getValue().get(i);
                     String iNumber = indicatorsDto.getINumber();
-                    if (!mediumExcelPoMap.containsKey(iNumber)) {
+                    MediumExcelPo mediumExcelPo = mediumExcelPoMap.get(iNumber);
+                    if (mediumExcelPo == null) {
+                        mediumExcelPo = new MediumExcelPo();
                         assemblyData(stringListEntry.getKey(), mediumExcelPo, indicatorsDto);
                         mediumExcelPoMap.put(iNumber, mediumExcelPo);
                     } else {
-                        mediumExcelPo = mediumExcelPoMap.get(iNumber);
                         assemblyData(stringListEntry.getKey(), mediumExcelPo, indicatorsDto);
-                    }
-                    if (StringUtils.isNotBlank(mediumExcelPo.getNumber())) {
-                        excelPoList.add(mediumExcelPo);
                     }
                 }
             }
         }
+        excelPoList.addAll(mediumExcelPoMap.values());
     }
 
     /**

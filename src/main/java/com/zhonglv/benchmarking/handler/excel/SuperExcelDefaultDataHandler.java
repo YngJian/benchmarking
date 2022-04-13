@@ -7,9 +7,8 @@ import com.zhonglv.benchmarking.domain.entity.po.SuperExcelPo;
 import com.zhonglv.benchmarking.utils.ExcelFillCellMergeStrategy;
 import com.zhonglv.benchmarking.utils.ExcelFillRowMergeStrategy;
 import com.zhonglv.benchmarking.utils.ExcelFreezeStrategy;
-import org.apache.commons.lang3.StringUtils;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,26 +27,24 @@ public class SuperExcelDefaultDataHandler extends SuperExcelDataHandler {
      */
     @Override
     public void assemblySuperExcel(Map<String, Map<String, List<IndicatorsDto>>> indicesMap, List<ExcelPo> excelPoList) {
-        Map<String, SuperExcelPo> superExcelPoMap = new HashMap<>();
+        Map<String, SuperExcelPo> superExcelPoMap = new LinkedHashMap<>(128);
         for (Map<String, List<IndicatorsDto>> value : indicesMap.values()) {
             for (Map.Entry<String, List<IndicatorsDto>> stringListEntry : value.entrySet()) {
                 for (int i = 0; i < stringListEntry.getValue().size(); i++) {
-                    SuperExcelPo superExcelPo = new SuperExcelPo();
                     IndicatorsDto indicatorsDto = stringListEntry.getValue().get(i);
                     String iNumber = indicatorsDto.getINumber();
-                    if (!superExcelPoMap.containsKey(iNumber)) {
+                    SuperExcelPo superExcelPo = superExcelPoMap.get(iNumber);
+                    if (superExcelPo == null) {
+                        superExcelPo = new SuperExcelPo();
                         assemblyData(stringListEntry.getKey(), superExcelPo, indicatorsDto);
                         superExcelPoMap.put(iNumber, superExcelPo);
                     } else {
-                        superExcelPo = superExcelPoMap.get(iNumber);
                         assemblyData(stringListEntry.getKey(), superExcelPo, indicatorsDto);
-                    }
-                    if (StringUtils.isNotBlank(superExcelPo.getNumber())) {
-                        excelPoList.add(superExcelPo);
                     }
                 }
             }
         }
+        excelPoList.addAll(superExcelPoMap.values());
     }
 
     /**

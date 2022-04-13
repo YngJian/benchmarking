@@ -16,7 +16,7 @@ import java.util.Map;
 /**
  * @author yangj
  */
-@ApiModel(value = "用户信息表")
+@ApiModel(value = "用户信息")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * @author Administrator
  */
-@ApiModel(value = "系列数据")
+@ApiModel(value = "系列返回数据")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

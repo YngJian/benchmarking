@@ -16,7 +16,7 @@ import java.util.Date;
 /**
  * 数据系类权限关联表
  */
-@ApiModel(value = "数据系类权限关联表")
+@ApiModel(value = "数据系类权限关联")
 @Data
 @Builder
 @AllArgsConstructor

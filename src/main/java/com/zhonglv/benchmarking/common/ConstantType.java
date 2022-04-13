@@ -47,6 +47,10 @@ public interface ConstantType {
 
     String COMPLETION_VALUE = "完成值";
 
+    String STANDARD_DEVIATION = "标准差";
+
+    String WEIGHTS = "权重";
+
     String SINGLE_INDEX = "单项指标能力指数";
 
     String COMPREHENSIVE_INDEX = "工序综合能力指数";

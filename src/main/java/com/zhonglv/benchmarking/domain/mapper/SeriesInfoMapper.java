@@ -13,14 +13,12 @@ import java.util.List;
  */
 @Mapper
 public interface SeriesInfoMapper extends BaseMapper<SeriesInfo> {
-
     /**
-     * selectSeriesByGroupId
+     * selectSeries
      *
-     * @param groupId groupId
      * @return List<SeriesInfo>
      */
-    List<SeriesInfo> selectSeriesByGroupId(@Param("groupId") Long groupId);
+    List<SeriesInfo> selectSeries();
 
     /**
      * selectIndicators
@@ -28,6 +26,7 @@ public interface SeriesInfoMapper extends BaseMapper<SeriesInfo> {
      * @param seriesNames     seriesNames
      * @param indicatorsNames indicatorsNames
      * @param seriesType      seriesType
+     * @param countYear       countYear
      * @param startTime       startTime
      * @param endTime         endTime
      * @return List<Indicators>
@@ -35,6 +34,7 @@ public interface SeriesInfoMapper extends BaseMapper<SeriesInfo> {
     List<Indicators> selectIndicators(@Param("seriesNames") List<String> seriesNames,
                                       @Param("indicatorsNames") List<String> indicatorsNames,
                                       @Param("seriesType") String seriesType,
+                                      @Param("countYear") String countYear,
                                       @Param("startTime") String startTime,
                                       @Param("endTime") String endTime);
 }

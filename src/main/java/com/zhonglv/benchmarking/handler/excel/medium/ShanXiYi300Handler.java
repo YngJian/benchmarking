@@ -1,8 +1,8 @@
 package com.zhonglv.benchmarking.handler.excel.medium;
 
 import com.zhonglv.benchmarking.domain.entity.dto.IndicatorsDto;
-import com.zhonglv.benchmarking.domain.entity.po.ExcelPo;
-import com.zhonglv.benchmarking.domain.entity.po.MediumExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.single.ExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.single.MediumExcelPo;
 import com.zhonglv.benchmarking.handler.excel.MediumExcelDataHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;

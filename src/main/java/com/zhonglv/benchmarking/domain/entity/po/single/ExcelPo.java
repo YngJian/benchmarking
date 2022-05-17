@@ -1,4 +1,4 @@
-package com.zhonglv.benchmarking.domain.entity.po;
+package com.zhonglv.benchmarking.domain.entity.po.single;
 
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.write.style.*;
@@ -34,6 +34,9 @@ public class ExcelPo {
      */
     @ExcelProperty(value = "序号", index = 0)
     @ApiModelProperty(value = "序号")
+    @ContentStyle(horizontalAlignment = HorizontalAlignmentEnum.LEFT, verticalAlignment = VerticalAlignmentEnum.CENTER,
+            wrapped = BooleanEnum.TRUE, borderTop = BorderStyleEnum.THIN, borderBottom = BorderStyleEnum.THIN,
+            borderLeft = BorderStyleEnum.THIN, borderRight = BorderStyleEnum.THIN)
     private String number;
 
     /**

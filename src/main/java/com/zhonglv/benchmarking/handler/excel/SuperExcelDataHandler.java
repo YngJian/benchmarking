@@ -2,11 +2,15 @@ package com.zhonglv.benchmarking.handler.excel;
 
 import com.alibaba.excel.write.builder.ExcelWriterBuilder;
 import com.zhonglv.benchmarking.domain.entity.dto.IndicatorsDto;
-import com.zhonglv.benchmarking.domain.entity.po.ExcelPo;
-import com.zhonglv.benchmarking.domain.entity.po.SuperExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.accumulate.MonthExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.accumulate.SuperMonthExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.single.ExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.single.SuperExcelPo;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @description:
@@ -29,11 +33,34 @@ public abstract class SuperExcelDataHandler implements ExcelDataHandler {
     /**
      * 数据处理
      *
+     * @param superMonthExcelPo superMonthExcelPo
+     * @param indicatorsDto     indicatorsDto
+     * @return ExcelPo ExcelPo
+     */
+    @Override
+    public MonthExcelPo dataProcessing(SuperMonthExcelPo superMonthExcelPo, IndicatorsDto indicatorsDto) {
+        return superMonthExcelPo;
+    }
+
+    /**
+     * 数据处理
+     *
      * @param indicesMap  indicesMap
      * @param excelPoList excelPoList
      */
     @Override
-    public void assemblySuperExcel(Map<String, Map<String, List<IndicatorsDto>>> indicesMap, List<ExcelPo> excelPoList) {
+    public void assemblyExcel(Map<String, Map<String, List<IndicatorsDto>>> indicesMap, List<ExcelPo> excelPoList) {
+
+    }
+
+    /**
+     * 数据处理
+     *
+     * @param indicesMap  indicesMap
+     * @param excelPoList excelPoList
+     */
+    @Override
+    public void assemblyMonthExcel(Map<String, Map<String, List<IndicatorsDto>>> indicesMap, List<MonthExcelPo> excelPoList) {
 
     }
 
@@ -44,5 +71,10 @@ public abstract class SuperExcelDataHandler implements ExcelDataHandler {
      */
     @Override
     public void writeExcelHandle(ExcelWriterBuilder write) {
+    }
+
+    @Override
+    public Set<String> includeHead(Integer monthCount) {
+        return new HashSet<>();
     }
 }

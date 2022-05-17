@@ -12,6 +12,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 /**
  * @author Administrator
  */
@@ -196,4 +198,11 @@ public class Indicators {
     @TableField(value = "Date_enter")
     @ApiModelProperty(value = "录入时间（yyyy-MM-dd）")
     private String dateEnter;
+
+    /**
+     * 累计平均
+     */
+    @TableField(exist = false)
+    @ApiModelProperty(value = "累计平均")
+    private BigDecimal accumulation;
 }

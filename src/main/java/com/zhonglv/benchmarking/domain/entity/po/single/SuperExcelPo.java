@@ -1,4 +1,4 @@
-package com.zhonglv.benchmarking.domain.entity.po;
+package com.zhonglv.benchmarking.domain.entity.po.single;
 
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.write.style.ColumnWidth;

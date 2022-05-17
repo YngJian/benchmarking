@@ -41,6 +41,7 @@ public class ExcelHandleFactory {
         HANDLER_MAPS.put(CompanyEnum.QING_HAI_180.getName(), QingHai180Handler.class);
         HANDLER_MAPS.put(CompanyEnum.QING_HAI_200.getName(), QingHai200Handler.class);
         HANDLER_MAPS.put(CompanyEnum.QING_HAI_240.getName(), QingHai240Handler.class);
+
         ASSEMBLY_MAPS.put(ConstantType.SUPER_EXCEL_PO, SuperExcelDefaultDataHandler.class);
         ASSEMBLY_MAPS.put(ConstantType.MEDIUM_EXCEL_PO, MediumExcelDefaultDataHandler.class);
         ASSEMBLY_MAPS.put(ConstantType.LOW_EXCEL_PO, LowExcelDefaultDataHandler.class);

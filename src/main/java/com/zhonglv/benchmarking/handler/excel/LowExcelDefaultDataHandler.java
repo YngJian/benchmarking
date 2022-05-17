@@ -2,14 +2,12 @@ package com.zhonglv.benchmarking.handler.excel;
 
 import com.alibaba.excel.write.builder.ExcelWriterBuilder;
 import com.zhonglv.benchmarking.domain.entity.dto.IndicatorsDto;
-import com.zhonglv.benchmarking.domain.entity.po.ExcelPo;
-import com.zhonglv.benchmarking.domain.entity.po.LowExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.accumulate.MonthExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.single.ExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.single.LowExcelPo;
 import com.zhonglv.benchmarking.utils.ExcelFillRowMergeStrategy;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * @description:
@@ -24,7 +22,7 @@ public class LowExcelDefaultDataHandler extends LowExcelDataHandler {
      * @param excelPoList excelPoList
      */
     @Override
-    public void assemblySuperExcel(Map<String, Map<String, List<IndicatorsDto>>> indicesMap, List<ExcelPo> excelPoList) {
+    public void assemblyExcel(Map<String, Map<String, List<IndicatorsDto>>> indicesMap, List<ExcelPo> excelPoList) {
         Map<String, LowExcelPo> lowExcelPoMap = new LinkedHashMap<>(128);
         for (Map<String, List<IndicatorsDto>> value : indicesMap.values()) {
             for (Map.Entry<String, List<IndicatorsDto>> stringListEntry : value.entrySet()) {
@@ -74,5 +72,21 @@ public class LowExcelDefaultDataHandler extends LowExcelDataHandler {
         write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 22));
         write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 26));
         write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 30));
+    }
+
+    /**
+     * 数据处理
+     *
+     * @param indicesMap  indicesMap
+     * @param excelPoList excelPoList
+     */
+    @Override
+    public void assemblyMonthExcel(Map<String, Map<String, List<IndicatorsDto>>> indicesMap, List<MonthExcelPo> excelPoList) {
+
+    }
+
+    @Override
+    public Set<String> includeHead(Integer monthCount) {
+        return null;
     }
 }

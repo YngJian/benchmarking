@@ -41,6 +41,8 @@ public interface ConstantType {
 
     String INDEX_LEVEL = "指标等级";
 
+    String BENCHMARKING_COMPANY = "标杆企业";
+
     String REFERENCE_VALUE = "2021年公司平均水平基准值";
 
     String BENCHMARK_VALUE = "标杆值";
@@ -56,4 +58,30 @@ public interface ConstantType {
     String COMPREHENSIVE_INDEX = "工序综合能力指数";
 
     String SERIES_INDEX = "系列综合能力指数";
+
+    String ACCUMULATIVE = "累计";
+
+    String JANUARY = "一月份";
+
+    String FEBRUARY = "二月份";
+
+    String MARCH = "三月份";
+
+    String APRIL = "四月份";
+
+    String MAY = "五月份";
+
+    String JUNE = "六月份";
+
+    String JULY = "七月份";
+
+    String AUGUST = "八月份";
+
+    String SEPTEMBER = "九月份";
+
+    String OCTOBER = "十月份";
+
+    String NOVEMBER = "十一月份";
+
+    String DECEMBER = "十二月份";
 }

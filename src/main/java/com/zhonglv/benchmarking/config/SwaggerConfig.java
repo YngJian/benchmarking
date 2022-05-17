@@ -1,9 +1,9 @@
 package com.zhonglv.benchmarking.config;
 
 import com.fasterxml.classmate.TypeResolver;
-import com.zhonglv.benchmarking.domain.entity.po.LowExcelPo;
-import com.zhonglv.benchmarking.domain.entity.po.MediumExcelPo;
-import com.zhonglv.benchmarking.domain.entity.po.SuperExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.single.LowExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.single.MediumExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.single.SuperExcelPo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

@@ -10,9 +10,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -32,7 +32,7 @@ public class UserInfoController {
     @ApiOperation("登陆")
     @UnLoginLimit
     @PostMapping("/login")
-    public Result<UserDto> login(@RequestBody @Valid @NotNull LoginDto loginDto) {
+    public Result<UserDto> login(@RequestBody @Validated({LoginDto.Login.class}) @NotNull LoginDto loginDto) {
         String userName = loginDto.getUserName();
         String password = loginDto.getPassword();
         return userInfoService.login(userName, password);
@@ -43,5 +43,12 @@ public class UserInfoController {
     public Result<Object> loginOut(@RequestHeader @NotBlank(message = "token 不能为空") String token) {
         stringRedisTemplate.delete(ConstantType.TOKEN_KEY + token);
         return new Result<>().toSuccess();
+    }
+
+    @ApiOperation("修改密码")
+    @PostMapping("/password")
+    public Result<Object> changePassword(@RequestHeader @NotBlank(message = "token 不能为空") String token,
+                                         @RequestBody @Validated({LoginDto.Change.class}) @NotNull LoginDto loginDto) {
+        return userInfoService.changePassword(token, loginDto);
     }
 }

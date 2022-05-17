@@ -1,4 +1,4 @@
-package com.zhonglv.benchmarking.domain.entity.po;
+package com.zhonglv.benchmarking.domain.entity.po.single;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

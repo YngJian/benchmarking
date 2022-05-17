@@ -5,25 +5,26 @@ import cn.hutool.core.util.NumberUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.write.builder.ExcelWriterBuilder;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zhonglv.benchmarking.common.CacheMap;
 import com.zhonglv.benchmarking.common.CommonResult;
 import com.zhonglv.benchmarking.common.ConstantType;
 import com.zhonglv.benchmarking.common.Result;
 import com.zhonglv.benchmarking.domain.entity.Indicators;
-import com.zhonglv.benchmarking.domain.entity.SeriesInfo;
+import com.zhonglv.benchmarking.domain.entity.IndicatorsStatistics;
 import com.zhonglv.benchmarking.domain.entity.dto.IndicatorsDto;
-import com.zhonglv.benchmarking.domain.entity.dto.UserInfoDto;
-import com.zhonglv.benchmarking.domain.entity.po.ComprehensiveIndex;
-import com.zhonglv.benchmarking.domain.entity.po.ExcelPo;
-import com.zhonglv.benchmarking.domain.entity.po.IndicatorsExcelPo;
-import com.zhonglv.benchmarking.domain.entity.po.IndicatorsPo;
+import com.zhonglv.benchmarking.domain.entity.po.accumulate.MonthExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.single.ComprehensiveIndex;
+import com.zhonglv.benchmarking.domain.entity.po.single.ExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.single.IndicatorsExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.single.IndicatorsPo;
 import com.zhonglv.benchmarking.domain.mapper.IndicatorsMapper;
 import com.zhonglv.benchmarking.domain.mapper.SeriesInfoMapper;
 import com.zhonglv.benchmarking.handler.excel.ExcelDataHandler;
 import com.zhonglv.benchmarking.handler.excel.ExcelHandleFactory;
 import com.zhonglv.benchmarking.service.IndicatorsService;
+import com.zhonglv.benchmarking.service.IndicatorsStatisticsService;
 import com.zhonglv.benchmarking.utils.ExcelFillCellMergeStrategy;
 import com.zhonglv.benchmarking.utils.ExcelFillRowMergeStrategy;
 import com.zhonglv.benchmarking.utils.ExcelFreezeStrategy;
@@ -58,44 +59,25 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
+    @Autowired
+    private IndicatorsStatisticsService indicatorsStatisticsService;
+
     /**
      * 获取系列数据
      *
-     * @param token           token
      * @param seriesNames     seriesNames
      * @param indicatorsNames indicatorsNames
+     * @param countYear       countYear
      * @param startTime       startTime
      * @param endTime         endTime
      * @return CommonResponse
      */
     @Override
-    public Result<IndicatorsPo> getIndicators(String token, String seriesNames, String indicatorsNames, String startTime, String endTime) {
-        String redis = stringRedisTemplate.opsForValue().get(ConstantType.TOKEN_KEY + token);
-        if (StringUtils.isBlank(redis)) {
-            log.info("The token has expired.");
-            return new Result<>(CommonResult.INVALID_PARAM.getCode(), "The token has expired.", null);
-        }
-        UserInfoDto userInfoDto = JSONObject.parseObject(redis, UserInfoDto.class);
-        List<SeriesInfo> seriesInfoList = new ArrayList<>();
-        Map<String, List<SeriesInfo>> seriesMap = userInfoDto.getSeriesMap();
-        for (Map.Entry<String, List<SeriesInfo>> map : seriesMap.entrySet()) {
-            seriesInfoList.addAll(map.getValue());
-        }
-        if (CollectionUtil.isEmpty(seriesInfoList)) {
-            log.info("This user does not have any data rights!");
-            return new Result<>(CommonResult.INVALID_PARAM.getCode(), "This user does not have any data rights!", null);
-        }
-
-        Set<String> series = seriesInfoList.stream().map(SeriesInfo::getInfo).collect(Collectors.toSet());
-        List<String> seriesNamesList = new ArrayList<>(series);
-
+    public Result<IndicatorsPo> getIndicators(String seriesNames, String indicatorsNames, String countYear,
+                                              String startTime, String endTime) {
+        List<String> seriesNamesList = new ArrayList<>();
         if (StringUtils.isNotEmpty(seriesNames)) {
             String[] split = seriesNames.split(",");
-            boolean anyMatch = Arrays.stream(split).anyMatch(s -> !series.contains(s));
-            if (anyMatch) {
-                log.info("Please pass in the correct parameter, which contains the unexisted viewing permission!");
-                return new Result<>(CommonResult.INVALID_PARAM.getCode(), "Please pass in the correct parameter, which contains the unexisted viewing permission!", null);
-            }
             seriesNamesList = Arrays.asList(split);
         }
 
@@ -105,8 +87,8 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
             indicatorsNamesList = Arrays.asList(split);
         }
 
-        List<Indicators> indicatorsList = seriesInfoMapper.selectIndicators(seriesNamesList, indicatorsNamesList, null,
-                startTime, endTime);
+        List<Indicators> indicatorsList = seriesInfoMapper.selectIndicators(seriesNamesList, indicatorsNamesList,
+                null, countYear, startTime, endTime);
 
         Map<String, List<IndicatorsDto>> groupIndicators = getGroupIndicators(Indicators::getSeriesName, indicatorsList);
 
@@ -121,14 +103,13 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
 
         Map<String, List<IndicatorsDto>> standardMap = new HashMap<>();
         if (CollectionUtil.isNotEmpty(standard)) {
-            List<Indicators> standardIndicators = seriesInfoMapper.selectIndicators(standard, indicatorsNamesList, null,
-                    startTime, endTime);
+            List<Indicators> standardIndicators = seriesInfoMapper.selectIndicators(standard, indicatorsNamesList,
+                    null, countYear, startTime, endTime);
             standardMap = getGroupIndicators(Indicators::getGroupName, standardIndicators);
         }
 
         Map<String, String> map = new TreeMap<>();
-        Map<String, Map<String, List<IndicatorsDto>>> standardIndicesMap = new TreeMap<>();
-        assemblyMap(standardMap, map, standardIndicesMap);
+        assemblyMap(standardMap, map);
 
         Map<String, List<ComprehensiveIndex>> indexMap = new TreeMap<>();
         Map<String, Map<String, List<IndicatorsDto>>> indicesMap = new TreeMap<>();
@@ -170,25 +151,15 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
 
         IndicatorsPo indicatorsPo = new IndicatorsPo()
                 .setIndicatorsMap(groupIndicators)
-                .setStandardMap(standardMap)
                 .setIndexMap(indexMap)
-                .setIndicesMap(indicesMap)
-                .setStandardIndicesMap(standardIndicesMap);
+                .setIndicesMap(indicesMap);
 
         return new Result<IndicatorsPo>().toSuccess(indicatorsPo);
     }
 
-    private void assemblyMap(Map<String, List<IndicatorsDto>> standardMap, Map<String, String> map,
-                             Map<String, Map<String, List<IndicatorsDto>>> standardIndicesMap) {
+    private void assemblyMap(Map<String, List<IndicatorsDto>> standardMap, Map<String, String> map) {
         for (Map.Entry<String, List<IndicatorsDto>> entry : standardMap.entrySet()) {
             List<IndicatorsDto> value = entry.getValue();
-
-            Map<String, List<IndicatorsDto>> listMap = value.stream().collect(
-                    Collectors.groupingBy(indicatorsDto -> indicatorsDto.getDateMonth() + "_" + indicatorsDto.getAbscissa(),
-                            TreeMap::new,
-                            Collectors.toList()));
-            standardIndicesMap.put(entry.getKey(), listMap);
-
             Map<String, List<IndicatorsDto>> collect = value.stream()
                     .collect(Collectors.groupingBy(IndicatorsDto::getDateMonth,
                             TreeMap::new,
@@ -237,7 +208,6 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
     /**
      * 获取系列数据
      *
-     * @param token           token
      * @param indicatorsNames indicatorsNames
      * @param seriesType      seriesType
      * @param startTime       startTime
@@ -245,15 +215,16 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
      * @return CommonResponse
      */
     @Override
-    public Result<IndicatorsPo> getIndicatorsByType(String token, String indicatorsNames, String seriesType, String startTime, String endTime) {
+    public Result<IndicatorsPo> getIndicatorsByType(String indicatorsNames, String seriesType,
+                                                    String countYear, String startTime, String endTime) {
         List<String> indicatorsNamesList = new ArrayList<>();
         if (StringUtils.isNotEmpty(indicatorsNames)) {
             String[] split = indicatorsNames.split(",");
             indicatorsNamesList = Arrays.asList(split);
         }
 
-        List<Indicators> indicatorsList = seriesInfoMapper.selectIndicators(null, indicatorsNamesList, seriesType,
-                startTime, endTime);
+        List<Indicators> indicatorsList = seriesInfoMapper.selectIndicators(null, indicatorsNamesList,
+                seriesType, countYear, startTime, endTime);
         Map<String, Map<String, List<IndicatorsDto>>> stringMapMap = indicatorsList.stream()
                 .collect(Collectors.groupingBy(Indicators::getGroupName,
                         Collectors.groupingBy(Indicators::getSeriesName, Collectors.mapping(indicators -> {
@@ -267,11 +238,10 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
             Optional<ExcelDataHandler> assemblyHandle = ExcelHandleFactory.getAssemblyHandle(seriesType);
             if (assemblyHandle.isPresent()) {
                 assemblyHandle.ifPresent(excelDataHandler ->
-                        assemblyHandle.get().assemblySuperExcel(stringMapMap, excelPoList));
+                        assemblyHandle.get().assemblyExcel(stringMapMap, excelPoList));
             } else {
                 log.info("This series type does not exist! type:{}", seriesType);
             }
-
         }
 
         return new Result<IndicatorsPo>().toSuccess(
@@ -283,15 +253,14 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
     /**
      * download
      *
-     * @param token      token
      * @param seriesName seriesName
      * @param startTime  startTime
      * @param endTime    endTime
      * @param response   response
      */
     @Override
-    public void download(String token, String seriesName, String startTime, String endTime, HttpServletResponse response) {
-        Result<IndicatorsPo> indicators = getIndicators(token, seriesName, null, startTime, endTime);
+    public void download(String seriesName, String startTime, String endTime, HttpServletResponse response) {
+        Result<IndicatorsPo> indicators = getIndicators(seriesName, null, null, startTime, endTime);
         if (!CommonResult.SUCCESS.getCode().equals(indicators.getCode())) {
             Result.responseError(response, JSON.toJSONString(indicators));
             return;
@@ -359,15 +328,14 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
     /**
      * download
      *
-     * @param token      token
      * @param seriesType seriesType
      * @param startTime  startTime
      * @param endTime    endTime
      * @param response   response
      */
     @Override
-    public void downloadBySeriesType(String token, String seriesType, String startTime, String endTime, HttpServletResponse response) {
-        Result<IndicatorsPo> indicators = getIndicatorsByType(token, null, seriesType, startTime, endTime);
+    public void downloadCountByType(String seriesType, String startTime, String endTime, HttpServletResponse response) {
+        Result<IndicatorsPo> indicators = getIndicatorsByType(null, seriesType, null, startTime, endTime);
         if (!CommonResult.SUCCESS.getCode().equals(indicators.getCode())) {
             log.info(indicators.getMsg());
             Result.responseError(response, JSON.toJSONString(indicators));
@@ -400,5 +368,113 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
         }
     }
 
+    /**
+     * 指标统计平均累计值
+     *
+     * @param seriesName seriesName
+     * @param year       year
+     * @return Result
+     */
+    @Override
+    public Result<Object> cumulativeValue(String seriesName, String year) {
+        LambdaQueryWrapper<Indicators> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Indicators::getSeriesName, seriesName);
+        queryWrapper.eq(Indicators::getYear, year);
+        List<Indicators> indicators = indicatorsMapper.selectList(queryWrapper);
+        Map<String, List<Indicators>> listMap = indicators.stream().collect(Collectors.groupingBy(Indicators::getDateMonth));
+
+        Integer monthCount = listMap.keySet().size();
+
+        if (monthCount == 0) {
+            log.info("The query data is empty! seriesName: {}, year: {}", seriesName, year);
+            return new Result<>().toFailed("The query data is empty!");
+        }
+
+        Map<Integer, Double> totalMap = indicators.stream().collect(Collectors.groupingBy(Indicators::getIId,
+                Collectors.summingDouble(indicator -> Double.parseDouble(indicator.getCompletionValue()))));
+
+        Map<Integer, IndicatorsStatistics> countMap = totalMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
+                stringDoubleEntry -> {
+                    double count = stringDoubleEntry.getValue() / monthCount;
+                    IndicatorsStatistics indicatorsStatistics = new IndicatorsStatistics();
+                    Integer entryKey = stringDoubleEntry.getKey();
+                    indicatorsStatistics.setIndicatorsId(String.valueOf(entryKey));
+                    indicatorsStatistics.setSeriesName(seriesName);
+                    indicatorsStatistics.setAccumulation(new BigDecimal(count));
+                    indicatorsStatistics.setYear(year);
+                    indicatorsStatistics.setCreateTime(new Date());
+                    return indicatorsStatistics;
+                }, (oldValue, newValue) -> newValue));
+
+        LambdaQueryWrapper<IndicatorsStatistics> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(IndicatorsStatistics::getSeriesName, seriesName);
+        wrapper.eq(IndicatorsStatistics::getYear, year);
+        indicatorsStatisticsService.delete(wrapper);
+
+        indicatorsStatisticsService.saveBatch(countMap.values());
+        return new Result<>().toSuccess();
+    }
+
+    /**
+     * 按类型导出每月累计值
+     *
+     * @param seriesType seriesType
+     * @param countYear  countYear
+     * @param response   response
+     */
+    @Override
+    public void downloadCountByType(String seriesType, String countYear, HttpServletResponse response) {
+        List<Indicators> indicatorsList = seriesInfoMapper.selectIndicators(null, null,
+                seriesType, countYear, null, null);
+
+        Map<String, Map<String, List<IndicatorsDto>>> stringMapMap = indicatorsList.stream()
+                .sorted(Comparator.comparing(Indicators::getIId))
+                .collect(Collectors.groupingBy(Indicators::getGroupName,
+                        Collectors.groupingBy(Indicators::getSeriesName, Collectors.mapping(indicators -> {
+                            IndicatorsDto indicatorsDto = new IndicatorsDto();
+                            BeanUtils.copyProperties(indicators, indicatorsDto);
+                            return indicatorsDto;
+                        }, Collectors.toList()))));
+
+        Set<String> includeHeads = new HashSet<>();
+        List<MonthExcelPo> excelPoList = new ArrayList<>();
+        Optional<ExcelDataHandler> assemblyHandle = ExcelHandleFactory.getAssemblyHandle(seriesType);
+        if (assemblyHandle.isPresent()) {
+            Map<String, List<Indicators>> listMap = indicatorsList.stream().
+                    collect(Collectors.groupingBy(Indicators::getDateMonth));
+            Integer monthCount = listMap.keySet().size();
+            includeHeads = assemblyHandle.get().includeHead(monthCount);
+
+            assemblyHandle.get().assemblyMonthExcel(stringMapMap, excelPoList);
+        } else {
+            log.info("This series type does not exist! type:{}", seriesType);
+        }
+
+        try {
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setCharacterEncoding("utf-8");
+            // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
+            String grade = CacheMap.GRADE_MAP.get(seriesType);
+            String fileName = URLEncoder.encode(grade, "UTF-8").replaceAll("\\+", "%20");
+            response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + System.currentTimeMillis() + ".xlsx");
+            // 这里需要设置不关闭流
+            ExcelWriterBuilder write = EasyExcel.write(response.getOutputStream(), CacheMap.MONTH_EXCEL_WRITE_CLASS_MAP.get(seriesType));
+
+            // if (includeHeads.size() > 0) {
+            //     write.includeColumnFiledNames(includeHeads);
+            // }
+
+            write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 1));
+            write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 2));
+            write.registerWriteHandler(new ExcelFreezeStrategy(0, 3, 0, 3));
+
+            write.head(CacheMap.MONTH_EXCEL_WRITE_CLASS_MAP.get(seriesType)).autoCloseStream(Boolean.FALSE).sheet(grade).doWrite(excelPoList);
+        } catch (Exception e) {
+            // 重置response
+            response.reset();
+            Result<IndicatorsPo> result = new Result<IndicatorsPo>().toFailed("Download file failed " + e.getMessage());
+            Result.responseError(response, JSON.toJSONString(result));
+        }
+    }
 }
 

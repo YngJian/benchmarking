@@ -2,8 +2,8 @@ package com.zhonglv.benchmarking.handler.excel;
 
 import com.alibaba.excel.write.builder.ExcelWriterBuilder;
 import com.zhonglv.benchmarking.domain.entity.dto.IndicatorsDto;
-import com.zhonglv.benchmarking.domain.entity.po.ExcelPo;
-import com.zhonglv.benchmarking.domain.entity.po.MediumExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.single.ExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.single.MediumExcelPo;
 import com.zhonglv.benchmarking.utils.ExcelFillRowMergeStrategy;
 
 import java.util.LinkedHashMap;
@@ -24,7 +24,7 @@ public class MediumExcelDefaultDataHandler extends MediumExcelDataHandler {
      * @param excelPoList excelPoList
      */
     @Override
-    public void assemblySuperExcel(Map<String, Map<String, List<IndicatorsDto>>> indicesMap, List<ExcelPo> excelPoList) {
+    public void assemblyExcel(Map<String, Map<String, List<IndicatorsDto>>> indicesMap, List<ExcelPo> excelPoList) {
         Map<String, MediumExcelPo> mediumExcelPoMap = new LinkedHashMap<>(128);
         for (Map<String, List<IndicatorsDto>> value : indicesMap.values()) {
             for (Map.Entry<String, List<IndicatorsDto>> stringListEntry : value.entrySet()) {

@@ -19,22 +19,21 @@
         tsi.create_time, tsi.update_time
     </sql>
 
-
-    <select id="selectSeriesByGroupId" resultType="com.zhonglv.benchmarking.domain.entity.SeriesInfo">
+    <select id="selectSeries" resultType="com.zhonglv.benchmarking.domain.entity.SeriesInfo">
         select
         <include refid="Base_Column_List"/>
-        from t_series_permission tsp
-        inner join t_series_info tsi
-        on tsp.series_id = tsi.id
-        where tsp.group_id = #{groupId,jdbcType=BIGINT}
+        from t_series_info tsi
     </select>
 
     <select id="selectIndicators" resultType="com.zhonglv.benchmarking.domain.entity.Indicators">
         select
-        <include refid="com.zhonglv.benchmarking.domain.mapper.IndicatorsMapper.Indicators_Column_List"/>
+        <include refid="com.zhonglv.benchmarking.domain.mapper.IndicatorsMapper.Indicators_Column_List"/>,
+         tis.accumulation
         from t_series_info tsi
         inner join indicators ids
         on tsi.info = ids.series_name
+        left outer join t_indicators_statistics tis
+        on ids.I_id = tis.indicators_id
         <where>
             <if test="seriesNames != null and seriesNames.size() > 0 ">
                 and tsi.info in
@@ -56,6 +55,9 @@
             </if>
             <if test="seriesType != null and seriesType != ''">
                 and tsi.series_type = #{seriesType,jdbcType=VARCHAR}
+            </if>
+            <if test="countYear != null and countYear != ''">
+                and tis.`year` = #{countYear,jdbcType=VARCHAR}
             </if>
         </where>
     </select>

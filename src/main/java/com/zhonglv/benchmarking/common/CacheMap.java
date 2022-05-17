@@ -1,10 +1,15 @@
 package com.zhonglv.benchmarking.common;
 
-import com.zhonglv.benchmarking.domain.entity.po.ExcelPo;
-import com.zhonglv.benchmarking.domain.entity.po.LowExcelPo;
-import com.zhonglv.benchmarking.domain.entity.po.MediumExcelPo;
-import com.zhonglv.benchmarking.domain.entity.po.SuperExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.accumulate.LowMonthExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.accumulate.MediumMonthExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.accumulate.MonthExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.accumulate.SuperMonthExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.single.ExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.single.LowExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.single.MediumExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.single.SuperExcelPo;
 import org.apache.commons.compress.utils.Lists;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,7 +28,9 @@ public class CacheMap {
     public final static Map<String, String> MODEL_MAP = new HashMap<>();
     public final static Map<String, String> GRADE_MAP = new HashMap<>();
     public final static Map<String, List<List<String>>> HEAD_MAP = new HashMap<>();
+    public final static Map<String, List<List<String>>> MONTH_HEAD_MAP = new HashMap<>();
     public final static Map<String, Class<? extends ExcelPo>> EXCEL_WRITE_CLASS_MAP = new HashMap<>();
+    public final static Map<String, Class<? extends MonthExcelPo>> MONTH_EXCEL_WRITE_CLASS_MAP = new HashMap<>();
 
     static {
         MONTH_MAP.put("01", "一月");
@@ -51,15 +58,21 @@ public class CacheMap {
         HEAD_MAP.put(ConstantType.MEDIUM_EXCEL_PO, mediumHead());
         HEAD_MAP.put(ConstantType.LOW_EXCEL_PO, lowHead());
 
+        MONTH_HEAD_MAP.put(ConstantType.SUPER_EXCEL_PO, superMonthHead());
+
         EXCEL_WRITE_CLASS_MAP.put(ConstantType.SUPER_EXCEL_PO, SuperExcelPo.class);
         EXCEL_WRITE_CLASS_MAP.put(ConstantType.MEDIUM_EXCEL_PO, MediumExcelPo.class);
         EXCEL_WRITE_CLASS_MAP.put(ConstantType.LOW_EXCEL_PO, LowExcelPo.class);
+
+        MONTH_EXCEL_WRITE_CLASS_MAP.put(ConstantType.SUPER_EXCEL_PO, SuperMonthExcelPo.class);
+        MONTH_EXCEL_WRITE_CLASS_MAP.put(ConstantType.MEDIUM_EXCEL_PO, MediumMonthExcelPo.class);
+        MONTH_EXCEL_WRITE_CLASS_MAP.put(ConstantType.LOW_EXCEL_PO, LowMonthExcelPo.class);
     }
 
     private static List<List<String>> superHead() {
         List<List<String>> headTitles = Lists.newArrayList();
         String superSystem = ConstantType.SUPER_SYSTEM;
-        commonHead(headTitles, superSystem);
+        commonHead(headTitles, superSystem, null);
         headTitles.add(Arrays.asList(superSystem, CompanyEnum.SHANG_XI_ZHONG_RUN_500.getName(), ConstantType.BENCHMARK_VALUE));
         headTitles.add(Arrays.asList(superSystem, CompanyEnum.HUA_YUN_500.getName(), ConstantType.COMPLETION_VALUE));
         headTitles.add(Arrays.asList(superSystem, CompanyEnum.HUA_YUN_500.getName(), ConstantType.SINGLE_INDEX));
@@ -72,10 +85,58 @@ public class CacheMap {
         return headTitles;
     }
 
+    private static List<List<String>> superMonthHead() {
+        List<List<String>> headTitles = Lists.newArrayList();
+        String superSystem = ConstantType.SUPER_SYSTEM;
+        commonHead(headTitles, superSystem, "1");
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.SHANG_XI_ZHONG_RUN_500.getName(), ConstantType.JANUARY));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.SHANG_XI_ZHONG_RUN_500.getName(), ConstantType.FEBRUARY));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.SHANG_XI_ZHONG_RUN_500.getName(), ConstantType.MARCH));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.SHANG_XI_ZHONG_RUN_500.getName(), ConstantType.APRIL));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.SHANG_XI_ZHONG_RUN_500.getName(), ConstantType.MAY));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.SHANG_XI_ZHONG_RUN_500.getName(), ConstantType.JUNE));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.SHANG_XI_ZHONG_RUN_500.getName(), ConstantType.JULY));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.SHANG_XI_ZHONG_RUN_500.getName(), ConstantType.AUGUST));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.SHANG_XI_ZHONG_RUN_500.getName(), ConstantType.SEPTEMBER));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.SHANG_XI_ZHONG_RUN_500.getName(), ConstantType.OCTOBER));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.SHANG_XI_ZHONG_RUN_500.getName(), ConstantType.NOVEMBER));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.SHANG_XI_ZHONG_RUN_500.getName(), ConstantType.DECEMBER));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.SHANG_XI_ZHONG_RUN_500.getName(), ConstantType.ACCUMULATIVE));
+
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.HUA_YUN_500.getName(), ConstantType.JANUARY));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.HUA_YUN_500.getName(), ConstantType.FEBRUARY));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.HUA_YUN_500.getName(), ConstantType.MARCH));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.HUA_YUN_500.getName(), ConstantType.APRIL));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.HUA_YUN_500.getName(), ConstantType.MAY));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.HUA_YUN_500.getName(), ConstantType.JUNE));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.HUA_YUN_500.getName(), ConstantType.JULY));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.HUA_YUN_500.getName(), ConstantType.AUGUST));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.HUA_YUN_500.getName(), ConstantType.SEPTEMBER));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.HUA_YUN_500.getName(), ConstantType.OCTOBER));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.HUA_YUN_500.getName(), ConstantType.NOVEMBER));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.HUA_YUN_500.getName(), ConstantType.DECEMBER));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.HUA_YUN_500.getName(), ConstantType.ACCUMULATIVE));
+
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.LIAN_CHENG_500.getName(), ConstantType.JANUARY));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.LIAN_CHENG_500.getName(), ConstantType.FEBRUARY));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.LIAN_CHENG_500.getName(), ConstantType.MARCH));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.LIAN_CHENG_500.getName(), ConstantType.APRIL));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.LIAN_CHENG_500.getName(), ConstantType.MAY));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.LIAN_CHENG_500.getName(), ConstantType.JUNE));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.LIAN_CHENG_500.getName(), ConstantType.JULY));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.LIAN_CHENG_500.getName(), ConstantType.AUGUST));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.LIAN_CHENG_500.getName(), ConstantType.SEPTEMBER));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.LIAN_CHENG_500.getName(), ConstantType.OCTOBER));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.LIAN_CHENG_500.getName(), ConstantType.NOVEMBER));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.LIAN_CHENG_500.getName(), ConstantType.DECEMBER));
+        headTitles.add(Arrays.asList(superSystem, CompanyEnum.LIAN_CHENG_500.getName(), ConstantType.ACCUMULATIVE));
+        return headTitles;
+    }
+
     private static List<List<String>> mediumHead() {
         List<List<String>> headTitles = Lists.newArrayList();
         String mediumSystem = ConstantType.MEDIUM_SYSTEM;
-        commonHead(headTitles, mediumSystem);
+        commonHead(headTitles, mediumSystem, null);
         headTitles.add(Arrays.asList(mediumSystem, CompanyEnum.SHAN_XI_ER_300.getName(), ConstantType.BENCHMARK_VALUE));
         headTitles.add(Arrays.asList(mediumSystem, CompanyEnum.BAO_TOU_400.getName(), ConstantType.COMPLETION_VALUE));
         headTitles.add(Arrays.asList(mediumSystem, CompanyEnum.BAO_TOU_400.getName(), ConstantType.SINGLE_INDEX));
@@ -99,7 +160,7 @@ public class CacheMap {
     private static List<List<String>> lowHead() {
         List<List<String>> headTitles = Lists.newArrayList();
         String lowSystem = ConstantType.LOW_SYSTEM;
-        commonHead(headTitles, lowSystem);
+        commonHead(headTitles, lowSystem, null);
         headTitles.add(Arrays.asList(lowSystem, CompanyEnum.LIAN_CHENG_200.getName(), ConstantType.BENCHMARK_VALUE));
         headTitles.add(Arrays.asList(lowSystem, CompanyEnum.BAO_TOU_240.getName(), ConstantType.COMPLETION_VALUE));
         headTitles.add(Arrays.asList(lowSystem, CompanyEnum.BAO_TOU_240.getName(), ConstantType.SINGLE_INDEX));
@@ -128,13 +189,16 @@ public class CacheMap {
         return headTitles;
     }
 
-    private static void commonHead(List<List<String>> headTitles, String system) {
+    private static void commonHead(List<List<String>> headTitles, String system, String month) {
         headTitles.add(Arrays.asList(system, ConstantType.INDEX_SERIAL_NUMBER, ConstantType.INDEX_SERIAL_NUMBER));
         headTitles.add(Arrays.asList(system, ConstantType.PROCESS_CLASSIFICATION, ConstantType.PROCESS_CLASSIFICATION));
         headTitles.add(Arrays.asList(system, ConstantType.INDICATOR_CATEGORY, ConstantType.INDICATOR_CATEGORY));
         headTitles.add(Arrays.asList(system, ConstantType.INDEX, ConstantType.INDEX));
         headTitles.add(Arrays.asList(system, ConstantType.UNIT, ConstantType.UNIT));
         headTitles.add(Arrays.asList(system, ConstantType.INDEX_LEVEL, ConstantType.INDEX_LEVEL));
+        if (StringUtils.isNotBlank(month)) {
+            headTitles.add(Arrays.asList(system, ConstantType.BENCHMARKING_COMPANY, ConstantType.BENCHMARKING_COMPANY));
+        }
         headTitles.add(Arrays.asList(system, ConstantType.REFERENCE_VALUE, ConstantType.REFERENCE_VALUE));
     }
 

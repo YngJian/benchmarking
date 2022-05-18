@@ -33,7 +33,10 @@
         inner join indicators ids
         on tsi.info = ids.series_name
         left outer join t_indicators_statistics tis
-        on ids.I_id = tis.indicators_id
+        on ids.Indicators_name = tis.indicators_name
+        and ids.Working_procedure_classification = tis.working_procedure_classification
+        and ids.`Year` = tis.`year`
+        and ids.Series_name = tis.series_name
         <where>
             <if test="seriesNames != null and seriesNames.size() > 0 ">
                 and tsi.info in
@@ -57,7 +60,7 @@
                 and tsi.series_type = #{seriesType,jdbcType=VARCHAR}
             </if>
             <if test="countYear != null and countYear != ''">
-                and tis.`year` = #{countYear,jdbcType=VARCHAR}
+                and ids.`year` = #{countYear,jdbcType=VARCHAR}
             </if>
         </where>
     </select>

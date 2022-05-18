@@ -35,11 +35,12 @@ public interface ExcelDataHandler {
     /**
      * 数据处理
      *
+     * @param companyName       companyName
      * @param superMonthExcelPo superMonthExcelPo
      * @param indicatorsDto     indicatorsDto
      * @return ExcelPo ExcelPo
      */
-    default MonthExcelPo dataProcessing(SuperMonthExcelPo superMonthExcelPo, IndicatorsDto indicatorsDto) {
+    default MonthExcelPo dataProcessing(String companyName, SuperMonthExcelPo superMonthExcelPo, IndicatorsDto indicatorsDto) {
         return superMonthExcelPo;
     }
 
@@ -57,11 +58,12 @@ public interface ExcelDataHandler {
     /**
      * 数据处理
      *
+     * @param companyName        companyName
      * @param mediumMonthExcelPo mediumMonthExcelPo
      * @param indicatorsDto      indicatorsDto
      * @return ExcelPo ExcelPo
      */
-    default MonthExcelPo dataProcessing(MediumMonthExcelPo mediumMonthExcelPo, IndicatorsDto indicatorsDto) {
+    default MonthExcelPo dataProcessing(String companyName, MediumMonthExcelPo mediumMonthExcelPo, IndicatorsDto indicatorsDto) {
         return mediumMonthExcelPo;
     }
 
@@ -79,11 +81,12 @@ public interface ExcelDataHandler {
     /**
      * 数据处理
      *
+     * @param companyName     companyName
      * @param lowMonthExcelPo lowMonthExcelPo
      * @param indicatorsDto   indicatorsDto
      * @return ExcelPo ExcelPo
      */
-    default MonthExcelPo dataProcessing(LowMonthExcelPo lowMonthExcelPo, IndicatorsDto indicatorsDto) {
+    default MonthExcelPo dataProcessing(String companyName, LowMonthExcelPo lowMonthExcelPo, IndicatorsDto indicatorsDto) {
         return lowMonthExcelPo;
     }
 
@@ -110,5 +113,5 @@ public interface ExcelDataHandler {
      */
     void writeExcelHandle(ExcelWriterBuilder write);
 
-    Set<String> includeHead(Integer monthCount);
+    Set<String> excludeHead(Set<String> excludeHeads, Set<String> months);
 }

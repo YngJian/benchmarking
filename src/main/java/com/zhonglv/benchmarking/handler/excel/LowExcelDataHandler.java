@@ -7,6 +7,7 @@ import com.zhonglv.benchmarking.domain.entity.po.accumulate.MonthExcelPo;
 import com.zhonglv.benchmarking.domain.entity.po.single.ExcelPo;
 import com.zhonglv.benchmarking.domain.entity.po.single.LowExcelPo;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,7 +38,7 @@ public abstract class LowExcelDataHandler implements ExcelDataHandler {
      * @return ExcelPo ExcelPo
      */
     @Override
-    public MonthExcelPo dataProcessing(LowMonthExcelPo lowMonthExcelPo, IndicatorsDto indicatorsDto) {
+    public MonthExcelPo dataProcessing(String companyName, LowMonthExcelPo lowMonthExcelPo, IndicatorsDto indicatorsDto) {
         return lowMonthExcelPo;
     }
 
@@ -74,7 +75,7 @@ public abstract class LowExcelDataHandler implements ExcelDataHandler {
     }
 
     @Override
-    public Set<String> includeHead(Integer monthCount) {
-        return null;
+    public Set<String> excludeHead(Set<String> excludeHeads, Set<String> months) {
+        return new HashSet<>();
     }
 }

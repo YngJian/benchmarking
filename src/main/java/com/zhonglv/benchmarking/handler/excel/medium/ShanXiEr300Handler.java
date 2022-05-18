@@ -1,11 +1,13 @@
 package com.zhonglv.benchmarking.handler.excel.medium;
 
 import com.zhonglv.benchmarking.handler.excel.MediumExcelDataHandler;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @description:
  * @author: Yang Jian
  * @time: 2022/4/11 14:32
  */
+@Slf4j
 public class ShanXiEr300Handler extends MediumExcelDataHandler {
 }

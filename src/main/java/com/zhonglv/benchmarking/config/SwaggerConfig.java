@@ -1,6 +1,9 @@
 package com.zhonglv.benchmarking.config;
 
 import com.fasterxml.classmate.TypeResolver;
+import com.zhonglv.benchmarking.domain.entity.po.accumulate.LowMonthExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.accumulate.MediumMonthExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.accumulate.SuperMonthExcelPo;
 import com.zhonglv.benchmarking.domain.entity.po.single.LowExcelPo;
 import com.zhonglv.benchmarking.domain.entity.po.single.MediumExcelPo;
 import com.zhonglv.benchmarking.domain.entity.po.single.SuperExcelPo;
@@ -43,7 +46,10 @@ public class SwaggerConfig {
                 .groupName(name)
                 .additionalModels(typeResolver.resolve(SuperExcelPo.class),
                         typeResolver.resolve(MediumExcelPo.class),
-                        typeResolver.resolve(LowExcelPo.class));
+                        typeResolver.resolve(LowExcelPo.class),
+                        typeResolver.resolve(SuperMonthExcelPo.class),
+                        typeResolver.resolve(MediumMonthExcelPo.class),
+                        typeResolver.resolve(LowMonthExcelPo.class));
     }
 
     //生成接口信息，包括标题、联系人，联系方式等

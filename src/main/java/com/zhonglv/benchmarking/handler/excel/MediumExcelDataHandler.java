@@ -7,6 +7,7 @@ import com.zhonglv.benchmarking.domain.entity.po.accumulate.MonthExcelPo;
 import com.zhonglv.benchmarking.domain.entity.po.single.ExcelPo;
 import com.zhonglv.benchmarking.domain.entity.po.single.MediumExcelPo;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,12 +33,13 @@ public abstract class MediumExcelDataHandler implements ExcelDataHandler {
     /**
      * 数据处理
      *
+     * @param companyName        companyName
      * @param mediumMonthExcelPo mediumMonthExcelPo
      * @param indicatorsDto      indicatorsDto
      * @return ExcelPo ExcelPo
      */
     @Override
-    public MonthExcelPo dataProcessing(MediumMonthExcelPo mediumMonthExcelPo, IndicatorsDto indicatorsDto) {
+    public MonthExcelPo dataProcessing(String companyName, MediumMonthExcelPo mediumMonthExcelPo, IndicatorsDto indicatorsDto) {
         return mediumMonthExcelPo;
     }
 
@@ -74,7 +76,7 @@ public abstract class MediumExcelDataHandler implements ExcelDataHandler {
     }
 
     @Override
-    public Set<String> includeHead(Integer monthCount) {
-        return null;
+    public Set<String> excludeHead(Set<String> excludeHeads, Set<String> months) {
+        return new HashSet<>();
     }
 }

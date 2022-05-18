@@ -1,7 +1,9 @@
 package com.zhonglv.benchmarking.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.zhonglv.benchmarking.annotations.UnLoginLimit;
 import com.zhonglv.benchmarking.common.Result;
+import com.zhonglv.benchmarking.domain.entity.po.accumulate.MonthExcelPo;
 import com.zhonglv.benchmarking.domain.entity.po.single.IndicatorsPo;
 import com.zhonglv.benchmarking.service.IndicatorsService;
 import com.zhonglv.benchmarking.utils.DateUtils;
@@ -9,6 +11,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotBlank;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * @author yangj
@@ -32,7 +36,7 @@ public class IndicatorsController {
     @Autowired
     private IndicatorsService indicatorsService;
 
-    @ApiOperation("获取系列数据")
+    @ApiOperation("系列--获取系列数据")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "token", value = "token", dataType = "String", dataTypeClass = String.class, paramType = "Header"),
             @ApiImplicitParam(name = "seriesNames", value = "所拥有的权限系列,多个以逗号隔开", dataType = "String", dataTypeClass = String.class, paramType = "query"),
@@ -60,7 +64,7 @@ public class IndicatorsController {
         return indicatorsService.getIndicators(seriesNames, indicatorsNames, countYear, startTime, endTime);
     }
 
-    @ApiOperation("根据系类类型获取数据")
+    @ApiOperation("系列--根据系类类型获取数据")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "token", value = "token", dataType = "String", dataTypeClass = String.class, paramType = "Header"),
             @ApiImplicitParam(name = "seriesType", value = "系类类型", allowableValues = "1,2,3", dataType = "String", dataTypeClass = String.class, paramType = "query"),
@@ -94,7 +98,7 @@ public class IndicatorsController {
      * @since 2.1.1
      */
 
-    @ApiOperation("导出权限内系列数据")
+    @ApiOperation("系列--导出权限内系列数据")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "seriesName", value = "系类名称名称", dataType = "String", dataTypeClass = String.class, paramType = "query"),
             @ApiImplicitParam(name = "startTime", value = "开始生产时间 格式yyyy-MM", dataType = "String", dataTypeClass = String.class, paramType = "query"),
@@ -125,7 +129,7 @@ public class IndicatorsController {
      * @since 2.1.1
      */
 
-    @ApiOperation("根据系列类型导出")
+    @ApiOperation("系列--根据系列类型导出")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "seriesType", value = "系类类型", allowableValues = "1,2,3", dataType = "String", dataTypeClass = String.class, paramType = "query"),
             @ApiImplicitParam(name = "startTime", value = "开始生产时间 格式yyyy-MM", dataType = "String", dataTypeClass = String.class, paramType = "query"),
@@ -155,16 +159,35 @@ public class IndicatorsController {
      *
      * @since 2.1.1
      */
-
-    @ApiOperation("指标统计平均累计值")
+    @ApiOperation("累计--指标统计平均累计值")
+    @Tag(name = "累计")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "seriesName", value = "seriesName", dataType = "String", dataTypeClass = String.class, paramType = "query"),
             @ApiImplicitParam(name = "year", value = "year", dataType = "String", dataTypeClass = String.class, paramType = "query")
     })
+    @UnLoginLimit
     @GetMapping("statistical")
     public Result<Object> cumulativeValue(@RequestParam(value = "seriesName") String seriesName,
                                           @RequestParam(value = "year") String year) {
         return indicatorsService.cumulativeValue(seriesName, year);
+    }
+
+    /**
+     * 指标统计平均累计值
+     *
+     * @since 2.1.1
+     */
+
+    @ApiOperation("累计--获取平均累计值列表")
+    @Tag(name = "累计")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "countYear", value = "统计年份", dataType = "String", dataTypeClass = String.class, paramType = "Header"),
+            @ApiImplicitParam(name = "seriesType", value = "系类类型", allowableValues = "1,2,3", dataType = "String", dataTypeClass = String.class, paramType = "query")
+    })
+    @GetMapping("statistical/list")
+    public Result<List<MonthExcelPo>> getCumulativeValue(@RequestParam(value = "seriesType") String seriesType,
+                                                         @RequestParam(value = "countYear") String countYear) {
+        return indicatorsService.getCumulativeValue(seriesType, countYear);
     }
 
     /**
@@ -173,7 +196,8 @@ public class IndicatorsController {
      * @since 2.1.1
      */
 
-    @ApiOperation("按类型导出每月累计值")
+    @ApiOperation("累计--按类型导出每月累计值")
+    @Tag(name = "累计")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "countYear", value = "统计年份", dataType = "String", dataTypeClass = String.class, paramType = "Header"),
             @ApiImplicitParam(name = "seriesType", value = "系类类型", allowableValues = "1,2,3", dataType = "String", dataTypeClass = String.class, paramType = "query")

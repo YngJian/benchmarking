@@ -33,12 +33,13 @@ public abstract class SuperExcelDataHandler implements ExcelDataHandler {
     /**
      * 数据处理
      *
+     * @param companyName       companyName
      * @param superMonthExcelPo superMonthExcelPo
      * @param indicatorsDto     indicatorsDto
      * @return ExcelPo ExcelPo
      */
     @Override
-    public MonthExcelPo dataProcessing(SuperMonthExcelPo superMonthExcelPo, IndicatorsDto indicatorsDto) {
+    public MonthExcelPo dataProcessing(String companyName, SuperMonthExcelPo superMonthExcelPo, IndicatorsDto indicatorsDto) {
         return superMonthExcelPo;
     }
 
@@ -74,7 +75,7 @@ public abstract class SuperExcelDataHandler implements ExcelDataHandler {
     }
 
     @Override
-    public Set<String> includeHead(Integer monthCount) {
+    public Set<String> excludeHead(Set<String> months, Set<String> excludeHeads) {
         return new HashSet<>();
     }
 }

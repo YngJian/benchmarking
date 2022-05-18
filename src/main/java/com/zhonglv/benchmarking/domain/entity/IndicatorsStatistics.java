@@ -34,11 +34,18 @@ public class IndicatorsStatistics {
     private String seriesName;
 
     /**
-     * indicators_id
+     * 指标名
      */
-    @TableField(value = "indicators_id")
-    @ApiModelProperty(value = "indicators_id")
-    private String indicatorsId;
+    @TableField(value = "indicators_name")
+    @ApiModelProperty(value = "指标名")
+    private String indicatorsName;
+
+    /**
+     * 工序分类
+     */
+    @TableField(value = "working_procedure_classification")
+    @ApiModelProperty(value = "工序分类")
+    private String workingProcedureClassification;
 
     /**
      * 累计平均

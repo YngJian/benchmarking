@@ -380,8 +380,8 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
         LambdaQueryWrapper<Indicators> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Indicators::getSeriesName, seriesName);
         queryWrapper.eq(Indicators::getYear, year);
-        List<Indicators> indicators = indicatorsMapper.selectList(queryWrapper);
-        Map<String, List<Indicators>> listMap = indicators.stream().collect(Collectors.groupingBy(Indicators::getDateMonth));
+        List<Indicators> indicatorsList = indicatorsMapper.selectList(queryWrapper);
+        Map<String, List<Indicators>> listMap = indicatorsList.stream().collect(Collectors.groupingBy(Indicators::getDateMonth));
 
         Integer monthCount = listMap.keySet().size();
 
@@ -390,15 +390,18 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
             return new Result<>().toFailed("The query data is empty!");
         }
 
-        Map<Integer, Double> totalMap = indicators.stream().collect(Collectors.groupingBy(Indicators::getIId,
+        Map<String, Double> totalMap = indicatorsList.stream().collect(Collectors.groupingBy(
+                indicators -> indicators.getWorkingProcedureClassification() + "_" + indicators.getIndicatorsName(),
                 Collectors.summingDouble(indicator -> Double.parseDouble(indicator.getCompletionValue()))));
 
-        Map<Integer, IndicatorsStatistics> countMap = totalMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
+        Map<String, IndicatorsStatistics> countMap = totalMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
                 stringDoubleEntry -> {
                     double count = stringDoubleEntry.getValue() / monthCount;
                     IndicatorsStatistics indicatorsStatistics = new IndicatorsStatistics();
-                    Integer entryKey = stringDoubleEntry.getKey();
-                    indicatorsStatistics.setIndicatorsId(String.valueOf(entryKey));
+                    String entryKey = stringDoubleEntry.getKey();
+                    String[] split = entryKey.split("_");
+                    indicatorsStatistics.setWorkingProcedureClassification(split[0]);
+                    indicatorsStatistics.setIndicatorsName(split[1]);
                     indicatorsStatistics.setSeriesName(seriesName);
                     indicatorsStatistics.setAccumulation(new BigDecimal(count));
                     indicatorsStatistics.setYear(year);
@@ -416,6 +419,24 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
     }
 
     /**
+     * 按类型获取每月累计值列表
+     *
+     * @param seriesType seriesType
+     * @param countYear  countYear
+     * @return result
+     */
+    @Override
+    public Result<List<MonthExcelPo>> getCumulativeValue(String seriesType, String countYear) {
+        Set<String> excludeHeads = new HashSet<>();
+        List<MonthExcelPo> excelPoList = getMonthExcelPoList(seriesType, countYear, excludeHeads);
+
+        return new Result<List<MonthExcelPo>>()
+                .setCode(CommonResult.SUCCESS.getCode())
+                .setMsg(CommonResult.SUCCESS.getMsg())
+                .setData(excelPoList);
+    }
+
+    /**
      * 按类型导出每月累计值
      *
      * @param seriesType seriesType
@@ -424,45 +445,21 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
      */
     @Override
     public void downloadCountByType(String seriesType, String countYear, HttpServletResponse response) {
-        List<Indicators> indicatorsList = seriesInfoMapper.selectIndicators(null, null,
-                seriesType, countYear, null, null);
-
-        Map<String, Map<String, List<IndicatorsDto>>> stringMapMap = indicatorsList.stream()
-                .sorted(Comparator.comparing(Indicators::getIId))
-                .collect(Collectors.groupingBy(Indicators::getGroupName,
-                        Collectors.groupingBy(Indicators::getSeriesName, Collectors.mapping(indicators -> {
-                            IndicatorsDto indicatorsDto = new IndicatorsDto();
-                            BeanUtils.copyProperties(indicators, indicatorsDto);
-                            return indicatorsDto;
-                        }, Collectors.toList()))));
-
-        Set<String> includeHeads = new HashSet<>();
-        List<MonthExcelPo> excelPoList = new ArrayList<>();
-        Optional<ExcelDataHandler> assemblyHandle = ExcelHandleFactory.getAssemblyHandle(seriesType);
-        if (assemblyHandle.isPresent()) {
-            Map<String, List<Indicators>> listMap = indicatorsList.stream().
-                    collect(Collectors.groupingBy(Indicators::getDateMonth));
-            Integer monthCount = listMap.keySet().size();
-            includeHeads = assemblyHandle.get().includeHead(monthCount);
-
-            assemblyHandle.get().assemblyMonthExcel(stringMapMap, excelPoList);
-        } else {
-            log.info("This series type does not exist! type:{}", seriesType);
-        }
-
+        Set<String> excludeHeads = new HashSet<>();
+        List<MonthExcelPo> excelPoList = getMonthExcelPoList(seriesType, countYear, excludeHeads);
         try {
             response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             response.setCharacterEncoding("utf-8");
             // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
-            String grade = CacheMap.GRADE_MAP.get(seriesType);
+            String grade = CacheMap.GRADE_MAP.get(seriesType) + "年度累计平均值";
             String fileName = URLEncoder.encode(grade, "UTF-8").replaceAll("\\+", "%20");
             response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + System.currentTimeMillis() + ".xlsx");
             // 这里需要设置不关闭流
             ExcelWriterBuilder write = EasyExcel.write(response.getOutputStream(), CacheMap.MONTH_EXCEL_WRITE_CLASS_MAP.get(seriesType));
 
-            // if (includeHeads.size() > 0) {
-            //     write.includeColumnFiledNames(includeHeads);
-            // }
+            if (excludeHeads.size() > 0) {
+                write.excludeColumnFiledNames(excludeHeads);
+            }
 
             write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 1));
             write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 2));
@@ -475,6 +472,32 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
             Result<IndicatorsPo> result = new Result<IndicatorsPo>().toFailed("Download file failed " + e.getMessage());
             Result.responseError(response, JSON.toJSONString(result));
         }
+    }
+
+    private List<MonthExcelPo> getMonthExcelPoList(String seriesType, String countYear, Set<String> excludeHeads) {
+        List<Indicators> indicatorsList = seriesInfoMapper.selectIndicators(null, null,
+                seriesType, countYear, null, null);
+
+        Map<String, Map<String, List<IndicatorsDto>>> stringMapMap = indicatorsList.stream()
+                .sorted(Comparator.comparing(Indicators::getIId))
+                .collect(Collectors.groupingBy(Indicators::getGroupName,
+                        Collectors.groupingBy(Indicators::getSeriesName, Collectors.mapping(indicators -> {
+                            IndicatorsDto indicatorsDto = new IndicatorsDto();
+                            BeanUtils.copyProperties(indicators, indicatorsDto);
+                            return indicatorsDto;
+                        }, Collectors.toList()))));
+
+        List<MonthExcelPo> excelPoList = new ArrayList<>();
+        Optional<ExcelDataHandler> assemblyHandle = ExcelHandleFactory.getAssemblyHandle(seriesType);
+        if (assemblyHandle.isPresent()) {
+            Map<String, List<Indicators>> listMap = indicatorsList.stream().
+                    collect(Collectors.groupingBy(Indicators::getMonth));
+            assemblyHandle.get().excludeHead(excludeHeads, listMap.keySet());
+            assemblyHandle.get().assemblyMonthExcel(stringMapMap, excelPoList);
+        } else {
+            log.info("This series type does not exist! type:{}", seriesType);
+        }
+        return excelPoList;
     }
 }
 

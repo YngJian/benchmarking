@@ -4,6 +4,7 @@ import com.zhonglv.benchmarking.domain.entity.dto.IndicatorsDto;
 import com.zhonglv.benchmarking.domain.entity.po.single.ExcelPo;
 import com.zhonglv.benchmarking.domain.entity.po.single.MediumExcelPo;
 import com.zhonglv.benchmarking.handler.excel.MediumExcelDataHandler;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 
@@ -12,7 +13,9 @@ import org.springframework.beans.BeanUtils;
  * @author: Yang Jian
  * @time: 2022/4/11 14:32
  */
+@Slf4j
 public class ShanXiYi300Handler extends MediumExcelDataHandler {
+
     /**
      * 数据处理
      *

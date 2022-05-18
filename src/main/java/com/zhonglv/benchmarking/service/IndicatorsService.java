@@ -3,9 +3,11 @@ package com.zhonglv.benchmarking.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.zhonglv.benchmarking.common.Result;
 import com.zhonglv.benchmarking.domain.entity.Indicators;
+import com.zhonglv.benchmarking.domain.entity.po.accumulate.MonthExcelPo;
 import com.zhonglv.benchmarking.domain.entity.po.single.IndicatorsPo;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 public interface IndicatorsService extends IService<Indicators> {
 
@@ -74,5 +76,14 @@ public interface IndicatorsService extends IService<Indicators> {
      * @param response   response
      */
     void downloadCountByType(String seriesType, String countYear, HttpServletResponse response);
+
+    /**
+     * 按类型获取每月累计值列表
+     *
+     * @param seriesType seriesType
+     * @param countYear  countYear
+     * @return result
+     */
+    Result<List<MonthExcelPo>> getCumulativeValue(String seriesType, String countYear);
 }
 

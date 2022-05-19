@@ -145,17 +145,24 @@ public class LowExcelDefaultDataHandler extends LowExcelDataHandler {
         Set<String> keySet = CacheMap.MONTH_MAP.keySet();
         Set<String> strings = new HashSet<>(keySet);
         strings.removeAll(months);
+        return getHeads(excludeHeads, strings);
+    }
 
-        strings.forEach(month -> {
-            excludeHeads.add(CompanyEnum.LIAN_CHENG_200.getShortName() + month);
-            excludeHeads.add(CompanyEnum.QING_HAI_180.getShortName() + month);
-            excludeHeads.add(CompanyEnum.QING_HAI_200.getShortName() + month);
-            excludeHeads.add(CompanyEnum.QING_HAI_240.getShortName() + month);
-            excludeHeads.add(CompanyEnum.LAN_ZHOU_200.getShortName() + month);
-            excludeHeads.add(CompanyEnum.BAO_TOU_200.getShortName() + month);
-            excludeHeads.add(CompanyEnum.BAO_TOU_240.getShortName() + month);
+    @Override
+    public Set<String> includeHead(Set<String> includeHeads, Set<String> months) {
+        return getHeads(includeHeads, months);
+    }
+
+    private Set<String> getHeads(Set<String> heads, Set<String> months) {
+        months.forEach(month -> {
+            heads.add(CompanyEnum.LIAN_CHENG_200.getShortName() + month);
+            heads.add(CompanyEnum.QING_HAI_180.getShortName() + month);
+            heads.add(CompanyEnum.QING_HAI_200.getShortName() + month);
+            heads.add(CompanyEnum.QING_HAI_240.getShortName() + month);
+            heads.add(CompanyEnum.LAN_ZHOU_200.getShortName() + month);
+            heads.add(CompanyEnum.BAO_TOU_200.getShortName() + month);
+            heads.add(CompanyEnum.BAO_TOU_240.getShortName() + month);
         });
-
-        return excludeHeads;
+        return heads;
     }
 }

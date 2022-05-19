@@ -78,4 +78,16 @@ public abstract class SuperExcelDataHandler implements ExcelDataHandler {
     public Set<String> excludeHead(Set<String> months, Set<String> excludeHeads) {
         return new HashSet<>();
     }
+
+    /**
+     * includeHead
+     *
+     * @param includeHeads includeHeads
+     * @param months       months
+     * @return Set
+     */
+    @Override
+    public Set<String> includeHead(Set<String> includeHeads, Set<String> months) {
+        return new HashSet<>();
+    }
 }

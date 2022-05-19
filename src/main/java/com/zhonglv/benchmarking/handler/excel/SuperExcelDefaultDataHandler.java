@@ -72,6 +72,26 @@ public class SuperExcelDefaultDataHandler extends SuperExcelDataHandler {
     /**
      * 数据处理
      *
+     * @param write write
+     */
+    @Override
+    public void writeExcelHandle(ExcelWriterBuilder write) {
+        int[] integers = {11, 15};
+        registerHandler(write, integers);
+    }
+
+    static void registerHandler(ExcelWriterBuilder write, int[] integers) {
+        write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 1));
+        write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 2));
+        write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 10));
+        write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 14));
+        write.registerWriteHandler(new ExcelFreezeStrategy(0, 3, 0, 3));
+        write.registerWriteHandler(new ExcelFillCellMergeStrategy(3, integers));
+    }
+
+    /**
+     * 数据处理
+     *
      * @param indicesMap  indicesMap
      * @param excelPoList excelPoList
      */
@@ -131,33 +151,20 @@ public class SuperExcelDefaultDataHandler extends SuperExcelDataHandler {
         Set<String> keySet = CacheMap.MONTH_MAP.keySet();
         Set<String> strings = new HashSet<>(keySet);
         strings.removeAll(months);
-
-        strings.forEach(month -> {
-            excludeHeads.add(CompanyEnum.SHANG_XI_ZHONG_RUN_500.getShortName() + month);
-            excludeHeads.add(CompanyEnum.HUA_YUN_500.getShortName() + month);
-            excludeHeads.add(CompanyEnum.LIAN_CHENG_500.getShortName() + month);
-        });
-
-        return excludeHeads;
+        return getHeads(excludeHeads, strings);
     }
 
-    /**
-     * 数据处理
-     *
-     * @param write write
-     */
     @Override
-    public void writeExcelHandle(ExcelWriterBuilder write) {
-        int[] integers = {11, 15};
-        registerHandler(write, integers);
+    public Set<String> includeHead(Set<String> includeHeads, Set<String> months) {
+        return getHeads(includeHeads, months);
     }
 
-    static void registerHandler(ExcelWriterBuilder write, int[] integers) {
-        write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 1));
-        write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 2));
-        write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 10));
-        write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 14));
-        write.registerWriteHandler(new ExcelFreezeStrategy(0, 3, 0, 3));
-        write.registerWriteHandler(new ExcelFillCellMergeStrategy(3, integers));
+    private Set<String> getHeads(Set<String> heads, Set<String> months) {
+        months.forEach(month -> {
+            heads.add(CompanyEnum.SHANG_XI_ZHONG_RUN_500.getShortName() + month);
+            heads.add(CompanyEnum.HUA_YUN_500.getShortName() + month);
+            heads.add(CompanyEnum.LIAN_CHENG_500.getShortName() + month);
+        });
+        return heads;
     }
 }

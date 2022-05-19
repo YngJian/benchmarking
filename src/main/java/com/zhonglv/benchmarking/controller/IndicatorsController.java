@@ -3,7 +3,7 @@ package com.zhonglv.benchmarking.controller;
 import com.alibaba.fastjson.JSON;
 import com.zhonglv.benchmarking.annotations.UnLoginLimit;
 import com.zhonglv.benchmarking.common.Result;
-import com.zhonglv.benchmarking.domain.entity.po.accumulate.MonthExcelPo;
+import com.zhonglv.benchmarking.domain.entity.po.IndicatorsAccumulate;
 import com.zhonglv.benchmarking.domain.entity.po.single.IndicatorsPo;
 import com.zhonglv.benchmarking.service.IndicatorsService;
 import com.zhonglv.benchmarking.utils.DateUtils;
@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotBlank;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.List;
 
 /**
  * @author yangj
@@ -185,8 +184,8 @@ public class IndicatorsController {
             @ApiImplicitParam(name = "seriesType", value = "系类类型", allowableValues = "1,2,3", dataType = "String", dataTypeClass = String.class, paramType = "query")
     })
     @GetMapping("statistical/list")
-    public Result<List<MonthExcelPo>> getCumulativeValue(@RequestParam(value = "seriesType") String seriesType,
-                                                         @RequestParam(value = "countYear") String countYear) {
+    public Result<IndicatorsAccumulate> getCumulativeValue(@RequestParam(value = "seriesType") String seriesType,
+                                                           @RequestParam(value = "countYear") String countYear) {
         return indicatorsService.getCumulativeValue(seriesType, countYear);
     }
 

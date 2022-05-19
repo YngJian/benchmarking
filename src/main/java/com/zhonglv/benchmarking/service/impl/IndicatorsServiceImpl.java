@@ -14,6 +14,7 @@ import com.zhonglv.benchmarking.common.Result;
 import com.zhonglv.benchmarking.domain.entity.Indicators;
 import com.zhonglv.benchmarking.domain.entity.IndicatorsStatistics;
 import com.zhonglv.benchmarking.domain.entity.dto.IndicatorsDto;
+import com.zhonglv.benchmarking.domain.entity.po.IndicatorsAccumulate;
 import com.zhonglv.benchmarking.domain.entity.po.accumulate.MonthExcelPo;
 import com.zhonglv.benchmarking.domain.entity.po.single.ComprehensiveIndex;
 import com.zhonglv.benchmarking.domain.entity.po.single.ExcelPo;
@@ -426,14 +427,19 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
      * @return result
      */
     @Override
-    public Result<List<MonthExcelPo>> getCumulativeValue(String seriesType, String countYear) {
+    public Result<IndicatorsAccumulate> getCumulativeValue(String seriesType, String countYear) {
         Set<String> excludeHeads = new HashSet<>();
-        List<MonthExcelPo> excelPoList = getMonthExcelPoList(seriesType, countYear, excludeHeads);
+        Set<String> includeHeads = new HashSet<>();
+        List<MonthExcelPo> excelPoList = getMonthExcelPoList(seriesType, countYear, excludeHeads, includeHeads);
 
-        return new Result<List<MonthExcelPo>>()
+        IndicatorsAccumulate indicatorsAccumulate = new IndicatorsAccumulate();
+        indicatorsAccumulate.setPropertyList(includeHeads)
+                .setMonthExcelPoList(excelPoList);
+
+        return new Result<IndicatorsAccumulate>()
                 .setCode(CommonResult.SUCCESS.getCode())
                 .setMsg(CommonResult.SUCCESS.getMsg())
-                .setData(excelPoList);
+                .setData(indicatorsAccumulate);
     }
 
     /**
@@ -446,7 +452,7 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
     @Override
     public void downloadCountByType(String seriesType, String countYear, HttpServletResponse response) {
         Set<String> excludeHeads = new HashSet<>();
-        List<MonthExcelPo> excelPoList = getMonthExcelPoList(seriesType, countYear, excludeHeads);
+        List<MonthExcelPo> excelPoList = getMonthExcelPoList(seriesType, countYear, excludeHeads, new HashSet<>());
         try {
             response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             response.setCharacterEncoding("utf-8");
@@ -474,7 +480,8 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
         }
     }
 
-    private List<MonthExcelPo> getMonthExcelPoList(String seriesType, String countYear, Set<String> excludeHeads) {
+    private List<MonthExcelPo> getMonthExcelPoList(String seriesType, String countYear, Set<String> excludeHeads,
+                                                   Set<String> includeHeads) {
         List<Indicators> indicatorsList = seriesInfoMapper.selectIndicators(null, null,
                 seriesType, countYear, null, null);
 
@@ -493,6 +500,7 @@ public class IndicatorsServiceImpl extends ServiceImpl<IndicatorsMapper, Indicat
             Map<String, List<Indicators>> listMap = indicatorsList.stream().
                     collect(Collectors.groupingBy(Indicators::getMonth));
             assemblyHandle.get().excludeHead(excludeHeads, listMap.keySet());
+            assemblyHandle.get().includeHead(includeHeads, listMap.keySet());
             assemblyHandle.get().assemblyMonthExcel(stringMapMap, excelPoList);
         } else {
             log.info("This series type does not exist! type:{}", seriesType);

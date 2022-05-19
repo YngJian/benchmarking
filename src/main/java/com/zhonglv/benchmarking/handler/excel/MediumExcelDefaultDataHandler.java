@@ -70,6 +70,20 @@ public class MediumExcelDefaultDataHandler extends MediumExcelDataHandler {
     /**
      * 数据处理
      *
+     * @param write write
+     */
+    @Override
+    public void writeExcelHandle(ExcelWriterBuilder write) {
+        int[] integers = {11, 15, 19, 23};
+        SuperExcelDefaultDataHandler.registerHandler(write, integers);
+
+        write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 18));
+        write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 22));
+    }
+
+    /**
+     * 数据处理
+     *
      * @param indicesMap  indicesMap
      * @param excelPoList excelPoList
      */
@@ -129,28 +143,28 @@ public class MediumExcelDefaultDataHandler extends MediumExcelDataHandler {
         Set<String> keySet = CacheMap.MONTH_MAP.keySet();
         Set<String> strings = new HashSet<>(keySet);
         strings.removeAll(months);
-
-        strings.forEach(month -> {
-            excludeHeads.add(CompanyEnum.SHAN_XI_ER_300.getShortName() + month);
-            excludeHeads.add(CompanyEnum.LAN_ZHOU_375.getShortName() + month);
-            excludeHeads.add(CompanyEnum.BAO_TOU_400.getShortName() + month);
-            excludeHeads.add(CompanyEnum.HUA_YUN_390.getShortName() + month);
-        });
-
-        return excludeHeads;
+        return getHeads(excludeHeads, strings);
     }
 
     /**
-     * 数据处理
+     * includeHead
      *
-     * @param write write
+     * @param includeHeads includeHeads
+     * @param months       months
+     * @return Set
      */
     @Override
-    public void writeExcelHandle(ExcelWriterBuilder write) {
-        int[] integers = {11, 15, 19, 23};
-        SuperExcelDefaultDataHandler.registerHandler(write, integers);
+    public Set<String> includeHead(Set<String> includeHeads, Set<String> months) {
+        return getHeads(includeHeads, months);
+    }
 
-        write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 18));
-        write.registerWriteHandler(new ExcelFillRowMergeStrategy(3, 22));
+    private Set<String> getHeads(Set<String> heads, Set<String> months) {
+        months.forEach(month -> {
+            heads.add(CompanyEnum.SHAN_XI_ER_300.getShortName() + month);
+            heads.add(CompanyEnum.LAN_ZHOU_375.getShortName() + month);
+            heads.add(CompanyEnum.BAO_TOU_400.getShortName() + month);
+            heads.add(CompanyEnum.HUA_YUN_390.getShortName() + month);
+        });
+        return heads;
     }
 }

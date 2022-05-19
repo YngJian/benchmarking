@@ -113,5 +113,21 @@ public interface ExcelDataHandler {
      */
     void writeExcelHandle(ExcelWriterBuilder write);
 
+    /**
+     * excludeHead
+     *
+     * @param excludeHeads excludeHead
+     * @param months       months
+     * @return Set
+     */
     Set<String> excludeHead(Set<String> excludeHeads, Set<String> months);
+
+    /**
+     * includeHead
+     *
+     * @param includeHeads includeHeads
+     * @param months       months
+     * @return Set
+     */
+    Set<String> includeHead(Set<String> includeHeads, Set<String> months);
 }
